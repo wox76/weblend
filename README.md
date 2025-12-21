@@ -31,7 +31,7 @@ There is still a lot to do to catch up with the giant that is **Blender**, but d
 ## 💬 Community & Support
 
 Join the conversation and stay updated:
-- **Facebook Group:** [Blender Italia & Weblend](https://www.facebook.com/groups/134106979989778)
+- **Facebook Group:** [Blender 3D Italia & Weblend](https://www.facebook.com/groups/134106979989778)
 - **Discord Server:** [Join our Discord](https://discord.com/channels/691583809640202251/691583810327805974)
 
 ## 📂 Project Structure
