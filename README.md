@@ -1,48 +1,40 @@
 # Weblend
 
-Weblend is a sophisticated web-based 3D modeling application inspired by professional desktop software. It allows users to create, manipulate, and edit 3D geometry directly in the browser using a modular and command-based architecture.
+**Weblend** is a passion project born from a deep love for **Blender** and the power of modern web technologies.
 
-## 🚀 Features
+## 👨‍💻 About the Author & The Vision
 
-### Core Modeling Tools
-- **Mesh Editing:** Support for Extrude, Bevel, Knife, and Loop Cut tools.
-- **Transformation:** Precise Translate, Rotate, and Scale operations.
-- **Geometry Generation:** Built-in primitives and dynamic mesh data handling.
-- **Selection Modes:** Vertex, Edge, and Face selection support.
+Hi, I'm **Andrea Rotondo**. I have been a passionate **Blender** enthusiast since version **2.43**. Over the years, I've watched **Blender** evolve into the industry standard it is today, and that evolution has always inspired me.
 
-### Modifier System
-- **Non-Destructive Workflow:** Apply modifiers like **Mirror** and **Array** to create complex shapes efficiently.
-- **Modifier Stack:** Manage and reorder modifiers to control the final output.
+Combining my experience in **JavaScript, WebGL, HTML, and CSS** with the cutting-edge assistance of **Gemini AI**, I set out to answer a question: *Can we bring a true, Blender-like modeling experience to the web?*
 
-### User Interface
-- **Modern Layout:** Includes a Toolbar, Sidebar for properties, and a Context Menu for quick actions.
-- **Viewport Controls:** Navigation gizmos, orthographic views, and shading modes (Solid, Wireframe, Texture).
-- **History System:** Complete Undo/Redo support via a command-based pattern.
+The result is **Weblend**.
 
-### Import/Export
-- Support for common 3D formats like **GLTF** and **OBJ**.
+## 🌟 Inspired by Blender
+
+**Weblend** isn't just a 3D viewer; it's a tribute to the **Blender** workflow. It aims to recreate the feeling of power and flexibility that **Blender** users love, right inside the browser.
+
+You will find familiar concepts everywhere:
+- **Modifier Stack:** Just like in **Blender**, we have a non-destructive workflow with modifiers like *Mirror* and *Array*.
+- **Edit Mode:** Vertex, Edge, and Face manipulation that feels right at home for **Blender** veterans.
+- **Tools:** The Knife, Loop Cut, Extrude, and Bevel tools are designed to mimic their **Blender** counterparts.
+
+## 🚀 Status: Moving Fast!
+
+There is still a lot to do to catch up with the giant that is **Blender**, but development is proceeding **extremely fast**. Thanks to the synergy between my coding skills and **Gemini**, features are being added and refined rapidly.
 
 ## 🛠️ Technology Stack
-- **Frontend:** Vanilla JavaScript (ES6+), HTML5, CSS3.
-- **Rendering:** WebGL-based engine.
-- **Architecture:** Command Pattern for state management and modular UI components.
+- **Core:** Vanilla JavaScript (ES6+) & WebGL
+- **UI:** HTML5 & CSS3 (Custom UI system)
+- **AI Partner:** Powered by **Gemini**
 
-## 📦 Installation & Usage
-
+## 📦 Installation
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/wox76/weblend.git
    ```
-2. **Open the project:**
-   Simply open `index.html` in a modern web browser. No build step is required for the basic version.
+2. **Run it:**
+   Simply open `index.html` in your browser.
 
-## 📂 Project Structure
-- `/js/core`: Core engine logic (Scene, Renderer, Camera).
-- `/js/commands`: Implementation of the Undo/Redo system.
-- `/js/tools`: Interactive modeling tools (Extrude, Bevel, etc.).
-- `/js/modifiers`: Non-destructive geometry modifiers.
-- `/js/ui`: Modular UI components.
-- `/assets`: Icons, textures, and matcaps.
-
-## 📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
+*Dedicated to the open-source community and Blender users everywhere.*
