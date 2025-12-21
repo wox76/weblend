@@ -28,7 +28,13 @@ There is still a lot to do to catch up with the giant that is **Blender**, but d
 - **UI:** HTML5 & CSS3 (Custom UI system)
 - **AI Partner:** Powered by **Gemini**
 
-## 📦 Installation
+## 💬 Community & Support
+
+Join the conversation and stay updated:
+- **Facebook Group:** [Blender Italia & Weblend](https://www.facebook.com/groups/134106979989778)
+- **Discord Server:** [Join our Discord](https://discord.com/channels/691583809640202251/691583810327805974)
+
+## 📂 Project Structure
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/wox76/weblend.git
