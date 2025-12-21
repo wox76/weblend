@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weblend - Collaborative 3D Modeling Tool</title>
+
+    <meta name="description" content="Weblend is a collaborative 3D modeling tool built for the web. Create, edit, and share 3D scenes in real-time.">
+    <meta name="application-name" content="Weblend" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg">
+    <link rel="manifest" href="assets/favicon_io/site.webmanifest">
+
+    <meta property="og:title" content="Collaborative 3D Modeling Tool" />
+    <meta property="og:description" content="Create, edit, and share 3D scenes in real-time. Weblend brings collaborative 3D modeling to the web." />
+    <meta property="og:image" content="https://weblend.com/assets/images/KokrafPreview.png" />
+    <meta property="og:url" content="https://weblend.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Weblend" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Weblend",
+      "operatingSystem": "Web",
+      "applicationCategory": "DesignApplication",
+      "url": "https://weblend.com",
+      "description": "Weblend is a collaborative 3D modeling tool built for the web. Create, edit, and share 3D scenes in real-time.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Weblend",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://weblend.com/assets/images/KokrafLogo.png",
+          "width": 512,
+          "height": 512
+        }
+      },
+      "potentialAction": [
+        {
+          "@type": "ViewAction",
+          "target": "https://github.com/sengchor/weblend",
+          "name": "Source Code"
+        },
+        {
+          "@type": "ViewAction",
+          "target": "https://discord.com/invite/FEkhTyggYq",
+          "name": "Community"
+        },
+        {
+          "@type": "ViewAction",
+          "target": "https://www.patreon.com/c/jourverse",
+          "name": "Patreon"
+        }
+      ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/menu-bar.css" />
+    <link rel="stylesheet" href="css/panel-tabs.css?v=2" />
+    <link rel="stylesheet" href="css/toolbar.css" />
+    <link rel="stylesheet" href="css/viewport-controls.css" />
+    <link rel="stylesheet" href="css/details-panel.css?v=2" />
+    <link rel="stylesheet" href="css/context-menu.css" />
+    <link rel="stylesheet" href="css/add-menu.css" />
+    <link rel="stylesheet" href="css/apply-menu.css" />
+    <link rel="stylesheet" href="css/navigation-bar.css" />
+    <link rel="stylesheet" href="css/splash-screen.css" />
+    <link rel="stylesheet" href="css/settings-panel.css" />
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.module.js",
+          "jsm/": "https://cdn.jsdelivr.net/npm/three@0.176.0/examples/jsm/",
+          "three/examples/": "https://cdn.jsdelivr.net/npm/three@0.176.0/examples/",
+          "three-gpu-pathtracer": "https://cdn.jsdelivr.net/npm/three-gpu-pathtracer@0.0.23/build/index.module.js",
+          "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.4/build/index.module.js",
+          "earcut": "https://cdn.jsdelivr.net/npm/earcut@3.0.2/src/earcut.js",
+          "mathjs": "https://esm.sh/mathjs@14.8.1?bundle"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-container">
+      <div id="menu-container"></div>
+
+      <div class="editor-container">
+        <canvas id="three-canvas"></canvas>
+        <div id="toolbar-container"></div>
+        <div id="viewport-controls-container"></div> 
+        <div id="viewHelper"></div>
+        <div id="navigation-bar-container"></div>
+        <div class="right-panel-resizer" id="right-panel-resizer"></div>
+        <div id="right-panel-container"></div>
+              <div id="floating-add-menu-container"></div>
+              <div id="floating-apply-menu-container"></div>
+              <div id="floating-context-menu-container"></div>
+              <div id="floating-shading-menu-container"></div>
+            </div>
+      <ul style="display: none;" id="hidden-seo-links">
+        <li><a href="https://github.com/sengchor/weblend">Source Code</a></li>
+        <li><a href="https://discord.com/invite/FEkhTyggYq">Community</a></li>
+        <li><a href="https://www.patreon.com/c/jourverse">Patreon</a></li>
+      </ul>
+      <div id="splash-screen-container"></div>
+      <div id="settings-panel-container"></div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+    <script>
+      function toggleCheck(item) {
+        item.classList.toggle('checked');
+      }
+
+      function handleEnter(event, input) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          input.blur(); 
+        }
+      }
+    </script>
+  </body>
+</html>

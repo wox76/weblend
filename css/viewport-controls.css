@@ -1,0 +1,273 @@
+.viewport-controls {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background-color: #303030;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  z-index: 9;
+}
+
+.viewport-menus {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-left: 10px;
+  font-family: sans-serif;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.mode-select, .camera-select {
+  padding: 2px 5px;
+  font-size: 12px;
+  border-radius: 3px;
+  color: #fff;
+  background-color: #303030;
+  border: 1px solid transparent;
+  cursor: pointer;
+  height: 24px;
+  margin-right: 5px;
+}
+
+.mode-select:hover, .camera-select:hover {
+  background-color: #444;
+}
+
+.shading-modes-buttons {
+  display: flex;
+  margin-left: 5px;
+  height: 24px;
+}
+
+.shading-button {
+  width: 24px;
+  height: 24px;
+  background-color: #303030;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1px;
+}
+
+.shading-button img {
+  width: 18px;
+  height: 18px;
+  /* Removed opacity and filter to show original white SVG */
+}
+
+.shading-button:hover {
+  background-color: #444;
+}
+
+.shading-button.active {
+  background-color: #4772b3; /* Blender blue-ish */
+}
+
+/* Snapping Controls */
+.snapping-controls {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+  height: 24px;
+  font-family: sans-serif;
+  color: #fff;
+}
+
+.snap-magnet {
+  width: 24px;
+  height: 24px;
+  background-color: #303030;
+  border: 1px solid transparent;
+  border-radius: 3px 0 0 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.snap-magnet:hover {
+  background-color: #444;
+}
+
+.snap-magnet.active {
+  background-color: #4772b3;
+}
+
+.snap-magnet img {
+  width: 16px;
+  height: 16px;
+}
+
+.snap-menu-container {
+  position: relative;
+  height: 24px;
+}
+
+.snap-menu-button {
+  width: 34px;
+  height: 24px;
+  background-color: #303030;
+  border: 1px solid transparent;
+  border-left: 1px solid #444;
+  border-radius: 0 3px 3px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.snap-menu-button:hover {
+  background-color: #444;
+}
+
+.snap-menu-button img {
+  width: 14px;
+  height: 14px;
+}
+
+.snap-menu-button .arrow {
+  font-size: 8px;
+  margin-left: 4px;
+  color: #fff;
+}
+
+.snap-dropdown {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  background-color: #1e1e1e;
+  border: 1px solid #1e1e1e;
+  list-style: none;
+  padding: 4px 0;
+  margin: 0;
+  min-width: 100px;
+  z-index: 100;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+}
+
+.snap-dropdown.hidden {
+  display: none;
+}
+
+.snap-dropdown li {
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.snap-dropdown li:hover {
+  background-color: #4772b3;
+}
+
+.snap-dropdown li img {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+}
+
+.mode-select {
+  margin-right: 0px;
+}
+
+#right-controls-container {
+  margin-left: auto; /* Push to right */
+  display: flex;
+  align-items: center;
+  z-index: 9;
+}
+
+.selection-mode {
+  display: flex;
+  flex-direction: row;
+  margin-left: 10px;
+  z-index: 9;
+}
+
+.selection-mode.hidden {
+  display: none;
+}
+
+.selection-button {
+  width: 20px;
+  height: 20px;
+  padding: 0px;
+  border: none;
+  cursor: pointer;
+  background-color: #303030;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1px;
+  border-radius: 2px;
+}
+
+.selection-button img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+  filter: invert(1);
+}
+
+.selection-button:hover {
+  background-color: #4772b3;
+}
+
+.selection-button.active {
+  background-color: #4772b3;
+}
+
+#selectionBox {
+  position: absolute;
+  border: 1px solid #FFD800;
+  background: rgba(255, 216, 0, 0.18);;
+  pointer-events: none;
+  display: none;
+}
+
+.operation-status {
+  position: absolute;
+  top: 40px; /* Relative to viewport-controls-container top (which starts at 30px). Wait, this is absolute relative to viewport-controls-container if it's relative? */
+  /* #viewport-controls-container is likely positioned relative/absolute in style.css? */
+  /* Assuming viewport-controls.html content is inside a container. */
+  /* The .viewport-controls has top: 30px. */
+  /* If I put .operation-status as sibling, I should position it at top: 70px (30+40). */
+  /* BUT wait, css above says .viewport-controls is absolute. */
+  /* If I add .operation-status to viewport-controls.html, it's a sibling of .viewport-controls. */
+  /* So it needs its own absolute positioning. */
+  top: 70px;
+  left: 0;
+  right: 0;
+  height: 24px;
+  /* background-color: rgba(0, 0, 0, 0.5); */ /* User might prefer opaque? */
+  background-color: #2b2b2b; /* Match other UI */
+  border-bottom: 1px solid #181818;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: monospace;
+  font-size: 12px;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.operation-status.hidden {
+  display: none;
+}
+
+.status-separator {
+  margin: 0 10px;
+  color: #666;
+}

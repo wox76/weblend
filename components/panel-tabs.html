@@ -1,0 +1,77 @@
+<div class="right-panel">
+  <div class="panel-tabs">
+    <button class="tab active">SCENE</button>
+    <button class="tab">SETTINGS</button>
+  </div>
+
+  <div class="panel-content" id="scene-tab">
+    <ul class="outliner-list" id="outliner-list">
+      <li draggable="true" class="outliner-item">• Light</li>
+      <li draggable="true" class="outliner-item">• Group</li>
+      <li draggable="true" class="outliner-item">• Camera</li>
+    </ul>
+    <div class="outliner-resizer" id="outliner-resizer"></div>
+    <div id="details-panel-container"></div>
+  </div>
+
+  <div class="panel-content" id="settings-tab" style="display: none;">
+    <ul class="project-settings-list">
+      <li class="setting-option">
+        <span class="label">SHORTCUTS</span>
+      </li>
+      <li class="setting-option">
+        <span class="label">Translate</span>
+        <input
+          class="key-input"
+          id="translate-shortcut"
+          type="text"
+          maxlength="1" />
+      </li>
+      <li class="setting-option">
+        <span class="label">Rotate</span>
+        <input
+          class="key-input"
+          id="rotate-shortcut"
+          type="text"
+          maxlength="1" />
+      </li>
+      <li class="setting-option">
+        <span class="label">Scale</span>
+        <input
+          class="key-input"
+          id="scale-shortcut"
+          type="text"
+          maxlength="1" />
+      </li>
+      <li class="setting-option">
+        <span class="label">Undo</span>
+        <input
+          class="key-input"
+          id="undo-shortcut"
+          type="text"
+          maxlength="1" />
+      </li>
+      <li class="setting-option">
+        <span class="label">Focus</span>
+        <input
+          class="key-input"
+          id="focus-shortcut"
+          type="text"
+          maxlength="1" />
+      </li>
+    </ul>
+    <div class="panel-divider"></div>
+    <ul class="project-settings-list">
+      <li class="setting-option" >
+        <span class="label" style="min-width: 217px;">HISTORY</span>
+        <input type="checkbox" id="persistent" />
+        <span class="label" style="min-width: 0px; margin: 3px;">Persistent</span>
+      </li>
+      <ul class="outliner-list" id="history-list" style="height: 200px; margin: 5px 1px">
+      </ul>
+      <li class="setting-option">
+        <button class="action-button" id="clear-button" style="width: 60px;">CLEAR</button>
+      </li>
+    </ul>
+  </div>
+</div>

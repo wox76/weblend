@@ -1,0 +1,55 @@
+<div id="settings-panel-backdrop" class="settings-panel-backdrop">
+  <div class="settings-panel-modal">
+    <div class="settings-header">
+       <span>Blender Preferences</span>
+       <span class="settings-close" id="settings-close">×</span>
+    </div>
+    <div class="settings-body">
+       <div class="settings-sidebar">
+          <ul>
+             <li class="active" data-tab="interface">Interface</li>
+             <li data-tab="themes">Themes</li>
+             <li data-tab="viewport">Viewport</li>
+             <li data-tab="lights">Lights</li>
+             <li data-tab="editing">Editing</li>
+             <li data-tab="animation">Animation</li>
+             <li data-tab="addons">Add-ons</li>
+             <li data-tab="input">Input</li>
+             <li data-tab="navigation">Navigation</li>
+             <li data-tab="keymap">Keymap</li>
+             <li data-tab="system">System</li>
+             <li data-tab="save-load">Save & Load</li>
+             <li data-tab="filepaths">File Paths</li>
+          </ul>
+       </div>
+       <div class="settings-content" id="settings-content-area">
+          <h3>Interface</h3>
+          <div class="setting-group">
+             <label>Display</label>
+             <div class="setting-item">
+                <span>Resolution Scale</span>
+                <input type="number" value="1.0" step="0.1">
+             </div>
+             <div class="setting-item">
+                <span>Line Width</span>
+                <input type="number" value="1" step="1">
+             </div>
+          </div>
+          <div class="setting-group">
+             <label>Editors</label>
+             <div class="setting-item">
+                <span>Header Position</span>
+                <select style="background: #333; color: #fff; border: 1px solid #444; border-radius: 3px;">
+                    <option>Top</option>
+                    <option>Bottom</option>
+                </select>
+             </div>
+          </div>
+       </div>
+    </div>
+    <div class="settings-footer">
+       <button class="settings-btn">Save Preferences</button>
+       <button class="settings-btn">Load Factory Settings</button>
+    </div>
+  </div>
+</div>

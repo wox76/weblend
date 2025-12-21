@@ -1,0 +1,92 @@
+<div class="details-panel">
+  <div class="properties-sidebar">
+    <button class="tab-icon" data-tab="output" title="Output Settings">
+      <img src="assets/icons/output.svg" alt="Output" class="icon-output" />
+    </button>
+    <button class="tab-icon" data-tab="object" title="Object Properties">
+      <img src="assets/icons/object_data.svg" alt="Object" class="icon-object" />
+    </button>
+    <button class="tab-icon" data-tab="modifier" title="Modifier Properties">
+      <img src="assets/icons/modifier.svg" alt="Modifier" class="icon-modifier" />
+    </button>
+    <button class="tab-icon" data-tab="material" title="Material Properties">
+      <img src="assets/icons/material.svg" alt="Material" class="icon-material" />
+    </button>
+  </div>
+
+  <div class="properties-main">
+    <div class="properties-header">
+      <span id="properties-title">Object</span>
+    </div>
+
+    <div class="properties-content" id="output-tab" style="display: none;">
+        <ul class="project-settings-list">
+          <li class="setting-option">
+            <span class="label">Antialias</span>
+            <input type="checkbox" id="antialias" checked />
+          </li>
+          <li class="setting-option">
+            <span class="label">Shadows</span>
+            <input type="checkbox" id="shadows" checked />
+            <select id="shadows-options" name="shadows-options">
+              <option value="0">BASIC</option>
+              <option value="1">PCF</option>
+              <option value="2">PCF SOFT</option>
+            </select>
+          </li>
+          <li class="setting-option">
+            <span class="label">Tonemapping</span>
+            <select id="tonemapping-options" name="tonemapping-options">
+              <option value="0">NO</option>
+              <option value="1">LINEAR</option>
+              <option value="2">REINHARD</option>
+              <option value="3">CINEON</option>
+              <option value="4">ACES FILMIC</option>
+              <option value="5">AGX</option>
+              <option value="6">NEUTRAL</option>
+            </select>
+          </li>
+        </ul>
+        <div class="panel-divider"></div>
+        <ul class="project-settings-list">
+          <li class="setting-option">
+            <span class="label">IMAGE</span>
+          </li>
+          <li class="setting-option">
+            <span class="label">Shading</span>
+            <select id="shading-options" name="shading-options">
+              <option value="solid">SOLID</option>
+              <option value="realistic">REALISTIC</option>
+            </select>
+          </li>
+          <li class="setting-option" id="samples-setting">
+            <span class="label">Samples</span>
+            <input class="number" id="pathtracerSamples" type="number" min="1" max="10000" step="1" value="16" onclick="this.select()" onkeydown="handleEnter(event, this)" />
+          </li>
+          <li class="setting-option">
+            <span class="label">Resolution</span>
+            <input class="number" id="image-width" type="number" min="1" max="10000" step="1" value="1024" onclick="this.select()" onkeydown="handleEnter(event, this)" />
+            <span>&times;</span>
+            <input class="number" id="image-height" type="number" min="1" max="10000" step="1" value="1024" onclick="this.select()" onkeydown="handleEnter(event, this)" />
+          </li>
+          <li class="setting-option">
+            <span class="label"></span> 
+            <button class="action-button" id="image-render-button">RENDER</button>
+          </li>
+        </ul>
+    </div>
+
+    <div class="properties-content" id="object-tab">
+      <div class="center-text" id="object-empty-message">Select an object to view details.</div>
+      <ul class="project-settings-list" id="object-properties-content"></ul>
+    </div>
+    <div class="properties-content" id="modifier-tab">
+      <ul class="project-settings-list" id="modifier-properties-content">
+          <li class="setting-option">No Modifiers applied.</li>
+      </ul>
+    </div>
+    <div class="properties-content" id="material-tab">
+      <ul class="project-settings-list" id="material-properties-content"></ul>
+    </div>
+  </div>
+</div>

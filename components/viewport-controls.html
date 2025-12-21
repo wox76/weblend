@@ -1,0 +1,153 @@
+<div class="viewport-controls">
+  <select class="mode-select" id="interaction-modes">
+    <option value="object" selected>OBJECT MODE</option>
+    <option value="edit">EDIT MODE</option>
+  </select>
+
+  <div class="selection-mode hidden">
+    <button class="selection-button active" data-tool="vertex">
+      <img src="assets/icons/point-select.svg" alt="Select" />
+    </button>
+    <button class="selection-button" data-tool="edge">
+      <img src="assets/icons/edge-select.svg" alt="Select" />
+    </button>
+    <button class="selection-button" data-tool="face">
+      <img src="assets/icons/face-select.svg" alt="Select" />
+    </button>
+  </div>
+
+  <ul class="viewport-menus">
+    <li class="menu-item">View
+      <ul class="submenu">
+        <li class="toggle-item checked" onclick="toggleCheck(this)">
+          <span class="tick"></span>
+          <span class="label">Grid Helper</span>
+        </li>
+        <li class="toggle-item checked" onclick="toggleCheck(this)">
+          <span class="tick"></span>
+          <span class="label">Camera Helpers</span>
+        </li>
+        <li class="toggle-item checked" onclick="toggleCheck(this)">
+          <span class="tick"></span>
+          <span class="label">Light Helpers</span>
+        </li>
+        <li class="toggle-item checked" onclick="toggleCheck(this)">
+          <span class="tick"></span>
+          <span class="label">Skeleton Helpers</span>
+        </li>
+        <li class="divider"></li>
+        <li class="fullscreen">Fullscreen</li>
+      </ul>
+    </li>
+    <li class="menu-item">Add
+      <ul class="submenu">
+        <li class="submenu-item" data-group="Group">Group</li>
+        <li class="submenu-item">
+          Mesh <span class="arrow">&#9656;</span>
+          <ul class="submenu right">
+            <li class="submenu-item" data-geometry="Plane">Plane</li>
+            <li class="submenu-item" data-geometry="Cube">Cube</li>
+            <li class="submenu-item" data-geometry="Circle">Circle</li>
+            <li class="submenu-item" data-geometry="Sphere">Sphere</li>
+            <li class="submenu-item" data-geometry="Cylinder">Cylinder</li>
+            <li class="submenu-item" data-geometry="Cone">Cone</li>
+            <li class="submenu-item" data-geometry="Torus">Torus</li>
+          </ul>
+        </li>
+        <li class="submenu-item">
+          Image <span class="arrow">&#9656;</span>
+          <ul class="submenu right">
+            <li class="submenu-item" data-image="Reference">Reference</li>
+          </ul>
+        </li>
+        <li class="submenu-item">
+          Light <span class="arrow">&#9656;</span>
+          <ul class="submenu right">
+            <li class="submenu-item" data-light="Ambient">Ambient</li>
+            <li class="submenu-item" data-light="Directional">Directional</li>
+            <li class="submenu-item" data-light="Hemisphere">Hemisphere</li>
+            <li class="submenu-item" data-light="Point">Point</li>
+            <li class="submenu-item" data-light="Spot">Spot</li>
+          </ul>
+        </li>
+        <li class="submenu-item">
+          Camera <span class="arrow">&#9656;</span>
+          <ul class="submenu right">
+            <li class="submenu-item" data-camera="Orthographic">Orthographic</li>
+            <li class="submenu-item" data-camera="Perspective">Perspective</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">Object
+      <ul class="submenu">
+        <li class="submenu-item" id="menu-object-join">Join <span class="shortcut">CTRL+J</span></li>
+        <li class="submenu-item">
+          Apply <span class="shortcut">CTRL+A</span> <span class="arrow">&#9656;</span>
+          <ul class="submenu right" id="menu-object-apply">
+            <li class="submenu-item" data-apply="translate">Location</li>
+            <li class="submenu-item" data-apply="rotate">Rotation</li>
+            <li class="submenu-item" data-apply="scale">Scale</li>
+            <li class="submenu-item" data-apply="all">All Transforms</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">Select
+      <ul class="submenu">
+        <li class="select-all">All <span class="shortcut">A</span></li>
+        <li class="select-none">None <span class="shortcut">Alt+A</span></li>
+        <li class="select-invert">Invert <span class="shortcut">Ctrl+I</span></li>
+      </ul>
+    </li>
+    <li class="menu-item">Help
+      <ul class="submenu">
+        <li class="sourcecode">Source Code</li>
+        <li class="about">About</li>
+        <li class="report">Report a Bug</li>
+        <li class="patreon">Patreon</li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="snapping-controls">
+      <button class="snap-magnet" id="snap-magnet" title="Snap">
+          <img src="assets/icons/snap_on.svg" alt="Magnet" />
+      </button>
+      <div class="snap-menu-container">
+          <button class="snap-menu-button" id="snap-menu-button" title="Snap To">
+              <img src="assets/icons/snap_vertex.svg" id="snap-current-icon" alt="Snap Mode" />
+              <span class="arrow">▼</span>
+          </button>
+          <ul class="snap-dropdown hidden" id="snap-dropdown">
+              <li data-snap="vertex"><img src="assets/icons/snap_vertex.svg"> Vertex</li>
+              <li data-snap="face"><img src="assets/icons/snap_face.svg"> Face</li>
+              <li data-snap="grid"><img src="assets/icons/snap_grid.svg"> Grid</li>
+          </ul>
+      </div>
+  </div>
+
+  <div id="right-controls-container">
+    <select class="camera-select" id="cameraDropdown">
+      <option value="perspective-camera" selected>CAMERA</option>
+    </select>
+    
+    <div class="shading-modes-buttons">
+      <button class="shading-button" data-shading-mode="wireframe" title="Wireframe Shading">
+        <img src="assets/icons/shading_wire.svg" alt="Wireframe" />
+      </button>
+      <button class="shading-button active" data-shading-mode="solid" title="Solid Shading">
+        <img src="assets/icons/shading_solid.svg" alt="Solid" />
+      </button>
+      <button class="shading-button" data-shading-mode="material" title="Material Shading">
+        <img src="assets/icons/shading_texture.svg" alt="Material" />
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="operation-status hidden" id="operation-status">
+  <span id="operation-name"></span>
+  <span class="status-separator">|</span>
+  <span id="operation-values"></span>
+</div>
