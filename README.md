@@ -10,6 +10,20 @@ Combining my experience in **JavaScript, WebGL, HTML, and CSS** with the cutting
 
 The result is **Weblend**.
 
+## 📺 Feature Demonstrations
+
+### 🪞 Real-time Mirror Modifier
+The Mirror modifier allows for non-destructive symmetry modeling, updating the mesh instantly as you work.
+<video src="assets/docs/mirror_realtime.mp4" controls width="100%"></video>
+
+### 🔼 Extrude Tool
+Replicating one of the most fundamental modeling operations, the Extrude tool lets you grow your geometry with precision.
+<video src="assets/docs/extrude.mp4" controls width="100%"></video>
+
+### 📥 Model Import
+Easily bring your existing assets into the scene with support for standard 3D formats.
+<video src="assets/docs/import.mp4" controls width="100%"></video>
+
 ## 🌟 Inspired by Blender
 
 **Weblend** isn't just a 3D viewer; it's a tribute to the **Blender** workflow. It aims to recreate the feeling of power and flexibility that **Blender** users love, right inside the browser.

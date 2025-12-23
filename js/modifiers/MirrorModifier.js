@@ -11,13 +11,9 @@ export class MirrorModifier {
     const axis = properties.axis || { x: true, y: false, z: false };
 
     // Axes to process
-    // Map Blender Axes (User) to Three.js Axes (Code)
-    // User X -> Code Z
-    // User Y -> Code X
-    // User Z -> Code Y
     const activeAxes = [];
-    if (axis.x) activeAxes.push('z');
-    if (axis.y) activeAxes.push('x');
+    if (axis.x) activeAxes.push('x');
+    if (axis.y) activeAxes.push('z');
     if (axis.z) activeAxes.push('y');
 
     if (activeAxes.length === 0) return meshData;
@@ -64,7 +60,7 @@ export class MirrorModifier {
               let newUVs = f.uvs ? [...f.uvs] : undefined;
               if (newUVs) newUVs.reverse();
               
-              meshData.addFace(newFaceVertices, newUVs);
+              meshData.addFace(newFaceVertices, newUVs, f.materialIndex);
           }
       }
   }

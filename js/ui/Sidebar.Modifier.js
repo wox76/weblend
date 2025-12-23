@@ -490,12 +490,15 @@ export class SidebarModifier {
 
   renderMirrorModifierUI(container, modifier) {
     const props = modifier.properties;
-    container.appendChild(this.createAxisSelector('Axis', props.axis || {x:true, y:false, z:false}, (newAxisObj) => {
-        this.updateModifierProperty(modifier.id, 'axis', newAxisObj);
+    container.appendChild(this.createAxisSelector('Axis', props.axis || {x:true, y:false, z:false}, (axis) => {
+        const currentAxis = modifier.properties.axis || {x:true, y:false, z:false};
+        const newAxis = { ...currentAxis };
+        newAxis[axis] = !newAxis[axis];
+        this.updateModifierProperty(modifier.id, 'axis', newAxis);
     }));
   }
 
-  createAxisSelector(label, valueObj, onChange) {
+  createAxisSelector(label, valueObj, onToggle) {
       const div = document.createElement('div');
       div.className = 'control-row';
       div.style.justifyContent = 'space-between';
@@ -532,11 +535,7 @@ export class SidebarModifier {
           
           btn.addEventListener('click', (e) => {
               e.stopPropagation();
-              const newVal = { ...valueObj };
-              newVal[axis] = !newVal[axis];
-              // Update local ref to keep track if clicked multiple times fast? 
-              // Actually updateModifierProperty triggers UI refresh so valueObj will be refreshed.
-              onChange(newVal);
+              onToggle(axis);
           });
           
           group.appendChild(btn);
