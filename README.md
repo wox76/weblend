@@ -14,15 +14,15 @@ The result is **Weblend**.
 
 ### 🪞 Real-time Mirror Modifier
 The Mirror modifier allows for non-destructive symmetry modeling, updating the mesh instantly as you work.
-<video src="assets/docs/mirror_realtime.mp4" controls width="100%"></video>
+![Real-time Mirror](assets/docs/mirror_realtime.gif)
 
 ### 🔼 Extrude Tool
 Replicating one of the most fundamental modeling operations, the Extrude tool lets you grow your geometry with precision.
-<video src="assets/docs/extrude.mp4" controls width="100%"></video>
+![Extrude Tool](assets/docs/extrude.gif)
 
 ### 📥 Model Import
 Easily bring your existing assets into the scene with support for standard 3D formats.
-<video src="assets/docs/import.mp4" controls width="100%"></video>
+![Model Import](assets/docs/import.gif)
 
 ## 🌟 Inspired by Blender
 
