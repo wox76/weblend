@@ -42,5 +42,11 @@ Join the conversation and stay updated:
 2. **Run it:**
    Simply open `index.html` in your browser.
 
----
-*Dedicated to the open-source community and Blender users everywhere.*
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+## 🤝 Credits & Inspiration
+
+- **Weblend** is inspired by the [kokraf](https://github.com/sengchor/kokraf) project by Seng Chor.
+- Dedicated to the open-source community and Blender users everywhere.
