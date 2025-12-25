@@ -3,6 +3,7 @@ import { VertexEditor } from './VertexEditor.js';
 import { SwitchModeCommand } from '../commands/SwitchModeCommand.js';
 import { SwitchSubModeCommand } from '../commands/SwitchSubModeCommand.js';
 import { MenubarAdd } from '../ui/Menubar.Add.js';
+import { MenubarMesh } from '../ui/Menubar.Mesh.js';
 import { MenubarObject } from '../ui/Menubar.Object.js';
 import { MenubarView } from '../ui/Menubar.View.js';
 import { MenubarSelect } from '../ui/Menubar.Select.js';
@@ -34,6 +35,7 @@ export default class ViewportControls {
       // Initialize Menus moved to Viewport Header
       new MenubarView(this.editor);
       new MenubarAdd(this.editor, container);
+      new MenubarMesh(this.editor, container);
       new MenubarObject(this.editor, container);
       new MenubarSelect(this.editor);
       new MenubarHelp(this.editor);

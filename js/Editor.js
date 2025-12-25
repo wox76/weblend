@@ -30,6 +30,7 @@ import ViewportNavigation from './tools/Viewport.Navigation.js';
 import { SplashScreen } from './ui/SplashScreen.js';
 import { SettingsPanel } from './ui/SettingsPanel.js';
 import { NumberDragger } from './ui/NumberDragger.js';
+import { OperatorPanel } from './ui/OperatorPanel.js';
 
 export default class Editor {
   constructor() {
@@ -74,6 +75,8 @@ export default class Editor {
       
       renderImage: new Signal(),
       textureAdded: new Signal(),
+
+      showOperatorPanel: new Signal(),
     }
 
     this.helpers = {};
@@ -108,6 +111,7 @@ export default class Editor {
     this.splashScreen = new SplashScreen(this);
     this.settingsPanel = new SettingsPanel(this);
     this.numberDragger = new NumberDragger(this);
+    this.operatorPanel = new OperatorPanel(this);
 
     this.clock = new THREE.Clock();
 
