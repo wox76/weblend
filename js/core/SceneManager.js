@@ -119,6 +119,23 @@ export default class SceneManager {
     object.traverse((child) => {
       this.addHelper(child);
       this.addCamera(child);
+      
+      // Sanitize material (fix corrupted saves)
+      if (child.isMesh) {
+          if (child.material) {
+              const isArray = Array.isArray(child.material);
+              const isValid = isArray ? child.material.every(m => m && m.isMaterial) : child.material.isMaterial;
+              
+              if (!isValid) {
+                  console.warn('Sanitized corrupted material on object:', child.name);
+                  child.material = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+              }
+          } else {
+              // No material? Default.
+              child.material = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+          }
+      }
+
       this.applyShading(child, this.currentShadingMode);
     });
 
