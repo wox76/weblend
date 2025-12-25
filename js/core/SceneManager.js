@@ -184,6 +184,13 @@ export default class SceneManager {
           });
           break;
       }
+      
+      // Force update for references to ensure hack kicks in if needed
+      this.mainScene.traverse(obj => {
+          if (obj.userData.isReference && obj.material) {
+              obj.material.needsUpdate = true;
+          }
+      });
     });
   }
 
