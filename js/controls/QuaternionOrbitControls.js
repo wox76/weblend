@@ -61,13 +61,6 @@ export class QuaternionOrbitControls {
 				this._rotateCamera();
 			} else if (this._state === 'pan') {
 				this._panCamera();
-
-                // Add simultaneous zoom when panning with SHIFT
-                const moveDeltaY = this.moveCurr.y - this.movePrev.y;
-                if (Math.abs(moveDeltaY) > 0) {
-                    const zoomFactor = 1 + moveDeltaY * this.zoomSpeed * 0.5;
-                    this._performZoom(zoomFactor);
-                }
 			}
 
 			this.movePrev.copy(this.moveCurr);
