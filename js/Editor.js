@@ -219,6 +219,12 @@ export default class Editor {
   }
 
   toJSON() {
+    const currentShading = this.sceneManager.currentShadingMode;
+    // Temporarily revert to material mode to save clean state (removes non-clonable userData.originalMaterial)
+    if (currentShading !== 'material') {
+        this.signals.viewportShadingChanged.dispatch('material');
+    }
+
     const json = {
       metadata: {
         version: 1.0,
@@ -231,6 +237,11 @@ export default class Editor {
 
     if (this.config.get('history')) {
       json.history = this.history.toJSON();
+    }
+
+    // Restore shading mode
+    if (currentShading !== 'material') {
+        this.signals.viewportShadingChanged.dispatch(currentShading);
     }
 
     return json;
