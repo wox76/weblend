@@ -105,7 +105,7 @@ export default class SceneManager {
       this.addHelper(child);
       this.addCamera(child);
       
-      // Restore override hack for Reference Images loaded from JSON
+      // Restore override hack for Reference Images loaded from JSON (Works for Solid, Wireframe, etc.)
       if (child.userData.isReference) {
           child.onBeforeRender = function ( renderer, scene, camera, geometry, material, group ) {
               if (scene.overrideMaterial) {
