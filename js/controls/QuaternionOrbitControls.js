@@ -18,6 +18,7 @@ export class QuaternionOrbitControls {
 
 		this._state = null;
 
+		this.domElement.style.touchAction = 'none'; // Disable browser touch handling
 		this._bindEvents();
 	}
 
@@ -136,7 +137,12 @@ export class QuaternionOrbitControls {
 	}
 
 	_onTouchEnd(event) {
-		this._state = null;
+		if (event.touches.length === 0) {
+			this._state = null;
+		} else if (event.touches.length === 1) {
+			this._state = 'orbit';
+			this.movePrev.copy(this._getMouseOnCircle(event.touches[0].clientX, event.touches[0].clientY));
+		}
 	}
 
 	_getTouchCenter(touches) {
