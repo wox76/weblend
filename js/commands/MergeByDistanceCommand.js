@@ -1,23 +1,32 @@
-import { Command } from './Commands.js';
 import { weldVertices } from '../utils/WeldVertices.js';
 import * as THREE from 'three';
 
-export class MergeByDistanceCommand extends Command {
+export class MergeByDistanceCommand {
+    static type = 'MergeByDistanceCommand';
+
 	constructor( editor, object, distance ) {
-		super( editor );
-		this.type = 'MergeByDistanceCommand';
+		this.editor = editor;
 		this.name = 'Merge by Distance';
 		
-		this.object = object;
-		this.distance = distance;
-		this.oldGeometry = object.geometry;
-		this.newGeometry = null;
-        
-        // Removed vertices count for reporting
-        this.removedCount = 0;
+        if (object) {
+		    this.object = object;
+            this.objectUuid = object.uuid;
+		    this.distance = distance;
+		    this.oldGeometry = object.geometry;
+		    this.newGeometry = null;
+            this.removedCount = 0;
+        }
 	}
 
 	execute() {
+        // Re-fetch object if needed (e.g. from JSON deserialization)
+        if (!this.object) {
+             this.object = this.editor.objectByUuid(this.objectUuid);
+             this.oldGeometry = this.object.geometry; 
+             // Note: if oldGeometry is not preserved/serialized, undo might fail if we don't save it. 
+             // The History system usually keeps the command instance in memory.
+        }
+
 		if ( !this.newGeometry ) {
             // Perform the weld
 			this.newGeometry = weldVertices( this.oldGeometry, this.distance );
@@ -28,8 +37,6 @@ export class MergeByDistanceCommand extends Command {
 		this.editor.signals.objectChanged.dispatch( this.object );
         this.editor.signals.sceneGraphChanged.dispatch();
         
-        // Update selection if needed (Vertex selection might be invalid now, so we clear it or switch to object mode)
-        // Usually good practice to clear sub-object selection after topology change
         if (this.editor.editSelection.editedObject === this.object) {
              this.editor.editSelection.clearSelection();
              this.editor.editHelpers.refreshHelpers();
@@ -39,6 +46,10 @@ export class MergeByDistanceCommand extends Command {
 	}
 
 	undo() {
+        if (!this.object) {
+             this.object = this.editor.objectByUuid(this.objectUuid);
+        }
+
 		this.object.geometry = this.oldGeometry;
 		this.editor.signals.objectChanged.dispatch( this.object );
         this.editor.signals.sceneGraphChanged.dispatch();
@@ -50,16 +61,26 @@ export class MergeByDistanceCommand extends Command {
 	}
 
 	toJSON() {
-		const output = super.toJSON( this );
-		output.objectUuid = this.object.uuid;
-		output.distance = this.distance;
-		return output;
+		return {
+            type: MergeByDistanceCommand.type,
+		    objectUuid: this.objectUuid,
+		    distance: this.distance
+        };
 	}
 
-	fromJSON( json ) {
-		super.fromJSON( json );
-		this.object = this.editor.objectByUuid( json.objectUuid );
-		this.distance = json.distance;
-		this.oldGeometry = this.object.geometry;
+	static fromJSON( editor, json ) {
+        if (!json || json.type !== MergeByDistanceCommand.type) return null;
+		
+        // Note: We can't fully restore oldGeometry here if we don't serialize it. 
+        // For simple property commands, it's easy. For geometry changes, we might need to rely on the fact 
+        // that 'execute' will generate new geometry from CURRENT geometry.
+        // But if we undo, we need the OLD geometry. 
+        // Typically, geometry commands are heavy and might not survive a full page reload (serialization) 
+        // unless we serialize the geometries themselves. 
+        // For now, we assume this command is created fresh.
+        
+        const object = editor.objectByUuid( json.objectUuid );
+        const cmd = new MergeByDistanceCommand( editor, object, json.distance );
+		return cmd;
 	}
 }
