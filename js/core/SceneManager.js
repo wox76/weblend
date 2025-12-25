@@ -103,6 +103,10 @@ export default class SceneManager {
   
   addObject(object, parent, index) {
     if (!object) return;
+    if (typeof object.toJSON !== 'function') {
+        console.error('SceneManager: Attempted to add non-serializable object', object);
+        return;
+    }
 
     if (object.userData.meshData && !(object.userData.meshData instanceof MeshData)) {
       MeshData.rehydrateMeshData(object);

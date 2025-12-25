@@ -225,6 +225,16 @@ export default class Editor {
         this.signals.viewportShadingChanged.dispatch('material');
     }
 
+    // Sanitize scene before serialization to prevent crash
+    const scene = this.sceneManager.mainScene;
+    for (let i = scene.children.length - 1; i >= 0; i--) {
+        const child = scene.children[i];
+        if (!child || typeof child.toJSON !== 'function') {
+            console.warn('Editor: Removing invalid object from scene before save:', child);
+            scene.remove(child);
+        }
+    }
+
     const json = {
       metadata: {
         version: 1.0,
