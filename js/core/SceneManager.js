@@ -143,8 +143,15 @@ export default class SceneManager {
 
       if (mode === 'material') {
           // Restore
-          if (object.userData.originalMaterial) {
-              object.material = object.userData.originalMaterial;
+          const original = object.userData.originalMaterial;
+          if (original) {
+              // Safety check: Ensure original is a valid Material instance
+              if (original.isMaterial || (Array.isArray(original) && original[0].isMaterial)) {
+                  object.material = original;
+              } else {
+                  console.warn('Restoring invalid material from userData (corruption), resetting to default.', original);
+                  object.material = new THREE.MeshStandardMaterial({color: 0xcccccc});
+              }
               delete object.userData.originalMaterial;
           }
       } else {
