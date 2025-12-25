@@ -313,7 +313,8 @@ export class SidebarModifier {
 
     // Icon
     const icon = document.createElement('img');
-    icon.src = `assets/icons/${modifier.type}.svg`;
+    const iconName = modifier.type === 'decimate' ? 'mod_decim' : modifier.type;
+    icon.src = `assets/icons/${iconName}.svg`;
     icon.className = 'modifier-icon';
     icon.onerror = () => { icon.style.display = 'none'; };
     header.appendChild(icon);
