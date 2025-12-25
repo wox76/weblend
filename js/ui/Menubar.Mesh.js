@@ -29,20 +29,25 @@ export class MenubarMesh {
     const cmd = new MergeByDistanceCommand(this.editor, object, defaultDistance);
     this.editor.execute(cmd);
 
-    // Show the operator panel
-    this.editor.signals.showOperatorPanel.dispatch(
-      'Merge by Distance',
-      {
-        distance: { type: 'number', value: defaultDistance, label: 'Distance', step: 0.0001, min: 0 }
-      },
-      (key, value) => {
-        if (key === 'distance') {
-           // Basic undo/redo flow for parameter change
-           this.editor.undo();
-           const newCmd = new MergeByDistanceCommand(this.editor, object, value);
-           this.editor.execute(newCmd);
-        }
-      }
-    );
+    const updatePanel = (distance, removedCount) => {
+        this.editor.signals.showOperatorPanel.dispatch(
+          'Merge by Distance',
+          {
+            distance: { type: 'number', value: distance, label: 'Distance', step: 0.0001, min: 0 },
+            info: { type: 'info', value: `Removed: ${removedCount} vertices`, label: 'Stats' }
+          },
+          (key, value) => {
+            if (key === 'distance') {
+               this.editor.undo();
+               const newCmd = new MergeByDistanceCommand(this.editor, object, value);
+               this.editor.execute(newCmd);
+               // Re-render panel to show new stats (might lose focus, but needed for info update)
+               updatePanel(value, newCmd.removedCount);
+            }
+          }
+        );
+    };
+
+    updatePanel(defaultDistance, cmd.removedCount);
   }
 }

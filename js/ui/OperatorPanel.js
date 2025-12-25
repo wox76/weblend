@@ -69,9 +69,14 @@ export class OperatorPanel {
         input.addEventListener('change', () => {
              callback(key, parseFloat(input.value));
         });
+        row.appendChild(input);
+      } else if (type === 'info') {
+        const info = document.createElement('span');
+        info.textContent = value;
+        info.style.color = '#888';
+        row.appendChild(info);
       }
-
-      row.appendChild(input);
+      
       this.content.appendChild(row);
     }
   }
