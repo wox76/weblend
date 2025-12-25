@@ -18,7 +18,7 @@ export class SubdivideCommand {
             this.oldMeshData = MeshData.serializeMeshData(object.userData.meshData);
             
             // Capture selection IDs
-            this.selectedFaceIds = Array.from(editor.editSelection.selectedFaces); 
+            this.selectedFaceIds = Array.from(editor.editSelection.selectedFaceIds); 
         }
     }
 
@@ -48,7 +48,7 @@ export class SubdivideCommand {
         
         // Update Selection to new faces
         this.editor.editSelection.clearSelection();
-        currentSelection.forEach(id => this.editor.editSelection.selectedFaces.add(id));
+        currentSelection.forEach(id => this.editor.editSelection.selectedFaceIds.add(id));
         
         this.editor.signals.objectChanged.dispatch(this.object);
         this.editor.signals.sceneGraphChanged.dispatch();
@@ -67,7 +67,7 @@ export class SubdivideCommand {
         
         // Restore Old Selection
         this.editor.editSelection.clearSelection();
-        this.selectedFaceIds.forEach(id => this.editor.editSelection.selectedFaces.add(id));
+        this.selectedFaceIds.forEach(id => this.editor.editSelection.selectedFaceIds.add(id));
         
         this.editor.signals.objectChanged.dispatch(this.object);
         this.editor.signals.sceneGraphChanged.dispatch();
