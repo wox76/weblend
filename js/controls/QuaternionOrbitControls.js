@@ -99,14 +99,17 @@ export class QuaternionOrbitControls {
 			this._state = 'orbit';
 			this.movePrev.copy(this._getMouseOnCircle(event.touches[0].clientX, event.touches[0].clientY));
 		} else if (event.touches.length === 2) {
-			this._state = 'pan-zoom';
+			this._state = 'touch-multi';
+			this._touchType = null;
 			
 			const center = this._getTouchCenter(event.touches);
 			this.movePrev.copy(this._getMouseOnCircle(center.x, center.y));
+            this._touchStartCenter = center;
 
 			const dx = event.touches[0].clientX - event.touches[1].clientX;
 			const dy = event.touches[0].clientY - event.touches[1].clientY;
 			this._touchPrevDist = Math.sqrt(dx * dx + dy * dy);
+            this._touchStartDist = this._touchPrevDist;
 		}
 	}
 
@@ -118,21 +121,39 @@ export class QuaternionOrbitControls {
 			this.moveCurr.copy(this._getMouseOnCircle(event.touches[0].clientX, event.touches[0].clientY));
 			this._rotateCamera();
 			this.movePrev.copy(this.moveCurr);
-		} else if (event.touches.length === 2 && this._state === 'pan-zoom') {
+		} else if (event.touches.length === 2 && this._state === 'touch-multi') {
 			const center = this._getTouchCenter(event.touches);
-			this.moveCurr.copy(this._getMouseOnCircle(center.x, center.y));
-			this._panCamera();
-			this.movePrev.copy(this.moveCurr);
-
-			const dx = event.touches[0].clientX - event.touches[1].clientX;
+            const dx = event.touches[0].clientX - event.touches[1].clientX;
 			const dy = event.touches[0].clientY - event.touches[1].clientY;
 			const dist = Math.sqrt(dx * dx + dy * dy);
 
-			if (this._touchPrevDist > 0) {
-				const factor = this._touchPrevDist / dist;
-				this._performZoom(factor);
-			}
-			this._touchPrevDist = dist;
+            if (!this._touchType) {
+                const distChange = Math.abs(dist - this._touchStartDist);
+                const panChange = Math.sqrt(Math.pow(center.x - this._touchStartCenter.x, 2) + Math.pow(center.y - this._touchStartCenter.y, 2));
+                const threshold = 5;
+
+                if (distChange > threshold || panChange > threshold) {
+                    if (distChange > panChange) {
+                        this._touchType = 'zoom';
+                    } else {
+                        this._touchType = 'pan';
+                    }
+                }
+            }
+
+            if (this._touchType === 'pan') {
+                this.moveCurr.copy(this._getMouseOnCircle(center.x, center.y));
+			    this._panCamera();
+			    this.movePrev.copy(this.moveCurr);
+                this._touchPrevDist = dist; // Sync zoom dist to prevent jump if logic changes
+            } else if (this._touchType === 'zoom') {
+                if (this._touchPrevDist > 0) {
+				    const factor = this._touchPrevDist / dist;
+				    this._performZoom(factor);
+			    }
+			    this._touchPrevDist = dist;
+                this.movePrev.copy(this._getMouseOnCircle(center.x, center.y)); // Sync pan pos to prevent jump
+            }
 		}
 	}
 
