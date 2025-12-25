@@ -1,0 +1,51 @@
+.add-menu {
+  position: absolute;
+  z-index: 1000;
+  display: none;
+}
+
+.add-menu .submenu {
+  position: static; /* Override absolute from menu-bar.css */
+  visibility: visible;
+  display: block;
+  background-color: #2b2b2b;
+  border: 1px solid #3e3e3e;
+  padding: 5px 0;
+  min-width: 150px;
+}
+
+.add-menu .submenu-item {
+  position: relative;
+  padding: 5px 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: sans-serif;
+  font-size: 14px;
+  color: #fff;
+}
+
+.add-menu .submenu-item:hover {
+  background-color: #4772b3;
+}
+
+/* Submenu popping to the right */
+.add-menu .submenu.right {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: -1px; /* Overlap border */
+  visibility: hidden;
+  border: 1px solid #3e3e3e;
+  z-index: 1001; /* Added z-index */
+}
+
+.add-menu .submenu-item:hover > .submenu.right {
+  visibility: visible;
+}
+
+.add-menu .arrow {
+  font-size: 10px;
+  margin-left: 10px;
+}

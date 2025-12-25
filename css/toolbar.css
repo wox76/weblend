@@ -1,0 +1,79 @@
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 70px;
+  left: 10px;
+  z-index: 9;
+}
+
+.toolbar-button img {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  opacity: 0.8;
+  filter: invert(1);
+}
+
+.toolbar-button {
+  width: 32px;
+  height: 32px;
+  padding: 0px;
+  position: relative;
+  border: none;
+  cursor: pointer;
+  background-color: #303030;
+  border-radius: 3px;
+  margin-bottom: 2px;
+}
+
+.toolbar-button:hover {
+  background-color: #4772b3;
+}
+
+.toolbar-button.active {
+  background-color: #4772b3;
+}
+
+.toolbar-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 4px;
+  left: 0px;
+  transform: translateX(40px);
+
+  background: #111;
+  color: #eee;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease-out;
+}
+
+.toolbar-button:hover::after {
+  opacity: 1;
+}
+
+.toolbar-spacer {
+  height: 8px;
+  width: 100%;
+}
+
+.toolbar-button[data-tool="extrude"] img,
+.toolbar-button[data-tool="loopcut"] img,
+.toolbar-button[data-tool="knife"] img {
+  width: 20px;
+  height: 20px;
+}
+
+.mesh-tools {
+  display: flex;
+  flex-direction: column;
+}
+
+.mesh-tools.hidden {
+  display: none;
+}

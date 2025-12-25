@@ -1,0 +1,51 @@
+.navigation-bar {
+  position: absolute;
+  top: 220px; /* Below ViewHelper (80 + 128 + padding) */
+  right: 20px;
+  width: 34px; /* Match button width */
+  display: flex;
+  flex-direction: column;
+  background: transparent; /* Removed container background */
+  padding: 0;
+  z-index: 9;
+}
+
+.nav-button {
+  width: 34px;
+  height: 34px;
+  background-color: rgba(20, 20, 20, 0.6); /* Dark background for each button */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+  cursor: pointer;
+  color: #ccc;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px; /* Increased spacing */
+  user-select: none;
+  touch-action: none;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.nav-button:hover {
+  background-color: rgba(40, 40, 40, 0.8);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-button:active {
+  transform: scale(0.95);
+  background-color: rgba(20, 20, 20, 0.9);
+}
+
+.nav-button:last-child {
+  margin-bottom: 0;
+}
+
+.nav-button img {
+  width: 20px; /* Slightly smaller icon inside */
+  height: 20px;
+  opacity: 0.9;
+}
