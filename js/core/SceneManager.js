@@ -104,6 +104,22 @@ export default class SceneManager {
     object.traverse((child) => {
       this.addHelper(child);
       this.addCamera(child);
+      
+      // Restore override hack for Reference Images loaded from JSON
+      if (child.userData.isReference) {
+          child.onBeforeRender = function ( renderer, scene, camera, geometry, material, group ) {
+              if (scene.overrideMaterial) {
+                  child.userData.savedOverride = scene.overrideMaterial;
+                  scene.overrideMaterial = null;
+              }
+          };
+          child.onAfterRender = function ( renderer, scene, camera, geometry, material, group ) {
+              if (child.userData.savedOverride) {
+                  scene.overrideMaterial = child.userData.savedOverride;
+                  child.userData.savedOverride = null;
+              }
+          };
+      }
     });
 
     this.signals.objectAdded.dispatch();

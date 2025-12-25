@@ -123,6 +123,22 @@ export class ObjectFactory {
       const mesh = new THREE.Mesh(geometry, material);
       mesh.name = 'Reference';
       mesh.userData.isReference = true;
+
+      // Hack to bypass scene.overrideMaterial (used in Solid shading)
+      mesh.onBeforeRender = function ( renderer, scene, camera, geometry, material, group ) {
+          if (scene.overrideMaterial) {
+              mesh.userData.savedOverride = scene.overrideMaterial;
+              scene.overrideMaterial = null;
+          }
+      };
+      
+      mesh.onAfterRender = function ( renderer, scene, camera, geometry, material, group ) {
+          if (mesh.userData.savedOverride) {
+              scene.overrideMaterial = mesh.userData.savedOverride;
+              mesh.userData.savedOverride = null;
+          }
+      };
+
       return mesh;
     }
     return null;
