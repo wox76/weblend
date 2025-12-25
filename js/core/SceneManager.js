@@ -21,6 +21,20 @@ export default class SceneManager {
     this.sceneHelpers = new THREE.Scene();
     this.sceneHelpers.background = null;
 
+    this.currentShadingMode = 'material';
+    this.overrideMaterials = {
+        solid: new THREE.MeshMatcapMaterial({
+            matcap: new THREE.TextureLoader().load('assets/textures/matcaps/040full.jpg'),
+            color: 0xcccccc,
+            side: THREE.DoubleSide
+        }),
+        normal: new THREE.MeshNormalMaterial(),
+        wireframe: new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            wireframe: true
+        })
+    };
+
     this.setupListeners();
   }
   
@@ -101,25 +115,11 @@ export default class SceneManager {
       object.parent = parent;
     }
 
+    // Apply current shading (manual override)
     object.traverse((child) => {
       this.addHelper(child);
       this.addCamera(child);
-      
-      // Restore override hack for Reference Images loaded from JSON (Works for Solid, Wireframe, etc.)
-      if (child.userData.isReference) {
-          child.onBeforeRender = function ( renderer, scene, camera, geometry, material, group ) {
-              if (scene.overrideMaterial) {
-                  child.userData.savedOverride = scene.overrideMaterial;
-                  scene.overrideMaterial = null;
-              }
-          };
-          child.onAfterRender = function ( renderer, scene, camera, geometry, material, group ) {
-              if (child.userData.savedOverride) {
-                  scene.overrideMaterial = child.userData.savedOverride;
-                  child.userData.savedOverride = null;
-              }
-          };
-      }
+      this.applyShading(child, this.currentShadingMode);
     });
 
     this.signals.objectAdded.dispatch();
@@ -135,6 +135,25 @@ export default class SceneManager {
     
     object.parent.remove(object);
     this.signals.objectRemoved.dispatch();
+  }
+
+  applyShading(object, mode) {
+      if (!object.isMesh) return;
+      if (object.userData.isReference) return; // SKIP REFERENCES
+
+      if (mode === 'material') {
+          // Restore
+          if (object.userData.originalMaterial) {
+              object.material = object.userData.originalMaterial;
+              delete object.userData.originalMaterial;
+          }
+      } else {
+          // Override
+          if (!object.userData.originalMaterial) {
+              object.userData.originalMaterial = object.material;
+          }
+          object.material = this.overrideMaterials[mode];
+      }
   }
 
   setupListeners() {
@@ -162,34 +181,11 @@ export default class SceneManager {
     });
 
     this.signals.viewportShadingChanged.add((value) => {
-      switch (value) {
-        case 'material':
-          this.mainScene.overrideMaterial = null;
-          break;
-        case 'solid':
-          const matcapTexture = new THREE.TextureLoader().load('assets/textures/matcaps/040full.jpg');
-          this.mainScene.overrideMaterial = new THREE.MeshMatcapMaterial({
-            matcap: matcapTexture,
-            color: 0xcccccc,
-            side: THREE.DoubleSide
-          });
-          break;
-        case 'normal':
-          this.mainScene.overrideMaterial = new THREE.MeshNormalMaterial();
-          break;
-        case 'wireframe':
-          this.mainScene.overrideMaterial = new THREE.MeshBasicMaterial({
-            color: 0x000000,
-            wireframe: true
-          });
-          break;
-      }
-      
-      // Force update for references to ensure hack kicks in if needed
-      this.mainScene.traverse(obj => {
-          if (obj.userData.isReference && obj.material) {
-              obj.material.needsUpdate = true;
-          }
+      this.currentShadingMode = value;
+      this.mainScene.overrideMaterial = null; // Ensure no global override
+
+      this.mainScene.traverse((obj) => {
+          this.applyShading(obj, value);
       });
     });
   }
