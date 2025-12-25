@@ -68,6 +68,7 @@ export class SidebarModifier {
         <li class="submenu-item" data-modifier="array">Array</li>
         <li class="submenu-item" data-modifier="mirror">Mirror</li>
         <li class="submenu-item" data-modifier="subdivision_surface">Subdivision Surface</li>
+        <li class="submenu-item" data-modifier="decimate">Decimate</li>
       </ul>
     `;
     document.body.appendChild(this.modifierListDropdown); 
@@ -136,6 +137,8 @@ export class SidebarModifier {
       defaultProperties = { levels: 1, renderLevels: 1 };
     } else if (type === 'mirror') {
       defaultProperties = { axis: { x: true, y: false, z: false } };
+    } else if (type === 'decimate') {
+      defaultProperties = { ratio: 1.0 };
     }
     this.editor.execute(new AddModifierCommand(this.editor, this.selectedObject, type, defaultProperties, name));
   }
@@ -230,6 +233,8 @@ export class SidebarModifier {
                      btn.style.color = active ? 'white' : '#ccc';
                  }
              });
+        } else if (mod.type === 'decimate') {
+            updateInput('[data-prop="ratio"]', props.ratio);
         }
     });
   }
@@ -367,6 +372,8 @@ export class SidebarModifier {
       this.renderSubdivisionSurfaceUI(content, modifier);
     } else if (modifier.type === 'mirror') {
       this.renderMirrorModifierUI(content, modifier);
+    } else if (modifier.type === 'decimate') {
+      this.renderDecimateModifierUI(content, modifier);
     }
 
     // Focus Trap Logic
@@ -495,6 +502,13 @@ export class SidebarModifier {
         const newAxis = { ...currentAxis };
         newAxis[axis] = !newAxis[axis];
         this.updateModifierProperty(modifier.id, 'axis', newAxis);
+    }));
+  }
+
+  renderDecimateModifierUI(container, modifier) {
+    const props = modifier.properties;
+    container.appendChild(this.createNumberRow('Ratio', props.ratio, 0.0, 1.0, 0.01, 'ratio', (val) => {
+        this.updateModifierProperty(modifier.id, 'ratio', val);
     }));
   }
 
