@@ -227,13 +227,36 @@ export default class Editor {
 
     // Sanitize scene before serialization to prevent crash
     const scene = this.sceneManager.mainScene;
-    for (let i = scene.children.length - 1; i >= 0; i--) {
-        const child = scene.children[i];
-        if (!child || typeof child.toJSON !== 'function') {
-            console.warn('Editor: Removing invalid object from scene before save:', child);
-            scene.remove(child);
+    
+    // Recursive sanitization function
+    const sanitizeObject = (obj) => {
+        if (!obj) return;
+        
+        // Sanitize userData
+        if (obj.userData) {
+            for (const key in obj.userData) {
+                const val = obj.userData[key];
+                // Remove functions or Three.js instances that cause CloneError
+                if (typeof val === 'function' || (val && typeof val === 'object' && (val.isMaterial || val.isTexture || val.isObject3D))) {
+                    delete obj.userData[key];
+                }
+            }
         }
-    }
+        
+        if (obj.children) {
+            for (let i = obj.children.length - 1; i >= 0; i--) {
+                const child = obj.children[i];
+                if (typeof child.toJSON !== 'function') {
+                    console.warn('Editor: Removing invalid object:', child);
+                    obj.remove(child);
+                } else {
+                    sanitizeObject(child);
+                }
+            }
+        }
+    };
+    
+    sanitizeObject(scene);
 
     const json = {
       metadata: {
