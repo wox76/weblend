@@ -212,7 +212,7 @@ export class QuaternionOrbitControls {
 		const eyeDirection = this.eye.clone().normalize();
 		const upDirection = this.camera.up.clone().normalize();
         const worldYAxis = new Vector3(0, 1, 0);
-		const worldUp = worldYAxis.clone(); // Always use global up for Turntable behavior
+		const worldUp = worldYAxis.clone().multiplyScalar(upDirection.dot(worldYAxis)).normalize();
 
 		const rightDirection = new Vector3().crossVectors(upDirection, eyeDirection).normalize();
 
