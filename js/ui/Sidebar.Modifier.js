@@ -235,6 +235,12 @@ export class SidebarModifier {
              });
         } else if (mod.type === 'decimate') {
             updateInput('[data-prop="ratio"]', props.ratio);
+            const infoEl = panel.querySelector('.face-count-info');
+            if (infoEl && this.selectedObject && this.selectedObject.geometry) {
+                const geometry = this.selectedObject.geometry;
+                const count = geometry.index ? geometry.index.count / 3 : geometry.attributes.position.count / 3;
+                infoEl.textContent = `Face Count: ${Math.floor(count)}`;
+            }
         }
     });
   }
@@ -510,6 +516,19 @@ export class SidebarModifier {
     container.appendChild(this.createNumberRow('Ratio', props.ratio, 0.0, 1.0, 0.01, 'ratio', (val) => {
         this.updateModifierProperty(modifier.id, 'ratio', val);
     }));
+
+    const infoRow = document.createElement('div');
+    infoRow.className = 'control-row';
+    infoRow.style.color = '#888';
+    infoRow.style.fontSize = '11px';
+    infoRow.style.justifyContent = 'flex-end';
+    infoRow.style.marginTop = '4px';
+    
+    const faceCountLabel = document.createElement('span');
+    faceCountLabel.className = 'face-count-info';
+    faceCountLabel.textContent = 'Face Count: -';
+    infoRow.appendChild(faceCountLabel);
+    container.appendChild(infoRow);
   }
 
   createAxisSelector(label, valueObj, onToggle) {
