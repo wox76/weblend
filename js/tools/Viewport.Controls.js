@@ -58,6 +58,11 @@ export default class ViewportControls {
     this.statusEl = root.querySelector('#operation-status');
     this.statusNameEl = root.querySelector('#operation-name');
     this.statusValuesEl = root.querySelector('#operation-values');
+    
+    this.menuMesh = root.querySelector('#menu-mesh');
+    if (this.menuMesh) {
+        this.menuMesh.classList.toggle('hidden', this.currentMode !== 'edit');
+    }
 
     if (this.snapMagnet) {
       this.snapMagnet.addEventListener('click', () => {
@@ -153,6 +158,10 @@ export default class ViewportControls {
 
     this.signals.modeChanged.add((newMode) => {
       this.currentMode = newMode;
+      
+      if (this.menuMesh) {
+          this.menuMesh.classList.toggle('hidden', newMode !== 'edit');
+      }
 
       if (this.interactionDropdown) {
         this.interactionDropdown.value = newMode;
