@@ -48,7 +48,16 @@ export class Storage {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      const request = store.put(value, PREFIX + key);
+
+      // Sanitize value to remove non-clonable objects (functions, etc)
+      let cleanValue = value;
+      try {
+        cleanValue = JSON.parse(JSON.stringify(value));
+      } catch (e) {
+        console.warn(`Storage.set: Failed to sanitize value for key "${key}". Saving as is.`, e);
+      }
+
+      const request = store.put(cleanValue, PREFIX + key);
 
       request.onsuccess = () => resolve();
       request.onerror = () => {
