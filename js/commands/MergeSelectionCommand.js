@@ -11,13 +11,6 @@ export class MergeSelectionCommand extends MeshDataCommand {
   /**
    * Static helper to perform the merge operation on a MeshData object.
    * Does NOT modify the input meshData in place, returns a cloned and modified one.
-   * 
-   * @param {MeshData} meshData - The source mesh data.
-   * @param {Array<number>} vertexIds - List of vertex IDs to merge.
-   * @param {string} type - 'center', 'cursor', 'collapse', 'first', 'last'.
-   * @param {THREE.Vector3} [targetPos] - Target position for center/cursor/collapse.
-   * @param {number} [targetVertexId] - Target vertex ID for first/last.
-   * @returns {MeshData} The new MeshData.
    */
   static performMerge(meshData, vertexIds, type, targetPos, targetVertexId) {
     if (!meshData || !vertexIds || vertexIds.length < 2) return null;
@@ -36,19 +29,15 @@ export class MergeSelectionCommand extends MeshDataCommand {
       victimIds = vertexIds.filter(id => id !== survivorId);
       const survivor = newMeshData.getVertex(survivorId);
       if (!survivor) return null;
-      finalPos = survivor.position;
+      finalPos = { ...survivor.position };
     } else {
-      // center, cursor, collapse
-      // For these, we pick the first one as survivor, but move it.
       survivorId = vertexIds[0];
       victimIds = vertexIds.slice(1);
-      
       if (targetPos) {
         finalPos = { x: targetPos.x, y: targetPos.y, z: targetPos.z };
       } else {
-        // Fallback if no targetPos provided (shouldn't happen for center/cursor)
         const survivor = newMeshData.getVertex(survivorId);
-        finalPos = survivor.position;
+        finalPos = { ...survivor.position };
       }
     }
 
@@ -58,114 +47,82 @@ export class MergeSelectionCommand extends MeshDataCommand {
     // Update survivor position
     survivorVertex.position = finalPos;
 
-    // Remap victims to survivor
+    // Collect all faces that involve victim vertices
+    const affectedFaceIds = new Set();
     for (const victimId of victimIds) {
-      const victimVertex = newMeshData.getVertex(victimId);
-      if (!victimVertex) continue;
-
-      // Remap Faces
-      // Iterate over a copy of faceIds because we modify the Set
-      const victimFaceIds = Array.from(victimVertex.faceIds);
-      for (const faceId of victimFaceIds) {
-        const face = newMeshData.faces.get(faceId);
-        if (!face) continue;
-
-        // Replace victimId with survivorId in face.vertexIds
-        for (let i = 0; i < face.vertexIds.length; i++) {
-          if (face.vertexIds[i] === victimId) {
-            face.vertexIds[i] = survivorId;
-          }
-        }
-
-        // Update connectivity
-        victimVertex.faceIds.delete(faceId);
-        survivorVertex.faceIds.add(faceId);
-      }
-
-      // Remap Edges
-      const victimEdgeIds = Array.from(victimVertex.edgeIds);
-      for (const edgeId of victimEdgeIds) {
-        const edge = newMeshData.edges.get(edgeId);
-        if (!edge) continue;
-
-        if (edge.v1Id === victimId) edge.v1Id = survivorId;
-        if (edge.v2Id === victimId) edge.v2Id = survivorId;
-
-        victimVertex.edgeIds.delete(edgeId);
-        survivorVertex.edgeIds.add(edgeId);
-      }
-
-      // Finally delete the victim vertex
-      // Note: deleteVertex() in MeshData deletes attached faces/edges too, 
-      // but we just moved them to survivor! So the victim has no faces/edges now?
-      // Wait, we manually cleared victimVertex.faceIds and edgeIds.
-      // So calling deleteVertex now is safe and correct (it removes it from vertices Map).
-      newMeshData.deleteVertex(victimVertex); 
-    }
-
-    // Cleanup Step 1: Remove degenerate edges (v1 == v2)
-    // Also merge edges that are duplicates (connect same v1, v2)
-    // We iterate over survivor's edges to check.
-    
-    // Filter survivor edges
-    const edgesToCheck = Array.from(survivorVertex.edgeIds);
-    const uniqueNeighborEdges = new Map(); // neighborId -> edgeId
-
-    for (const edgeId of edgesToCheck) {
-      const edge = newMeshData.edges.get(edgeId);
-      if (!edge) {
-        survivorVertex.edgeIds.delete(edgeId); // Cleanup stale ref
-        continue;
-      }
-
-      // Self-loop?
-      if (edge.v1Id === edge.v2Id) {
-        newMeshData.deleteEdge(edge);
-        continue;
-      }
-
-      // Duplicate edge?
-      const neighborId = (edge.v1Id === survivorId) ? edge.v2Id : edge.v1Id;
-      
-      if (uniqueNeighborEdges.has(neighborId)) {
-        // We found a duplicate edge connecting survivor to neighborId.
-        // We must merge them.
-        const keepEdgeId = uniqueNeighborEdges.get(neighborId);
-        const keepEdge = newMeshData.edges.get(keepEdgeId);
-        const dropEdge = edge;
-
-        // Merge faces from dropEdge to keepEdge
-        for (const faceId of dropEdge.faceIds) {
-            const face = newMeshData.faces.get(faceId);
-            if (face) {
-                face.edgeIds.delete(dropEdge.id);
-                face.edgeIds.add(keepEdge.id);
-                keepEdge.faceIds.add(faceId);
-            }
-        }
-        
-        // Delete dropEdge
-        newMeshData.deleteEdge(dropEdge);
-      } else {
-        uniqueNeighborEdges.set(neighborId, edgeId);
+      const victim = newMeshData.getVertex(victimId);
+      if (victim) {
+        victim.faceIds.forEach(fid => affectedFaceIds.add(fid));
       }
     }
+    // Also include survivor's faces as they might need topology update
+    survivorVertex.faceIds.forEach(fid => affectedFaceIds.add(fid));
 
-    // Cleanup Step 2: Remove degenerate faces
-    // Faces with < 3 unique vertices
-    // Or faces that have collapsed to a line/point
-    // We check faces connected to survivor
-    const facesToCheck = Array.from(survivorVertex.faceIds);
-    for (const faceId of facesToCheck) {
+    // Recreate affected faces
+    for (const faceId of affectedFaceIds) {
       const face = newMeshData.faces.get(faceId);
       if (!face) continue;
 
-      const uniqueV = new Set(face.vertexIds);
-      if (uniqueV.size < 3) {
-        newMeshData.deleteFace(face);
+      // Map old vertex IDs to new ones (victim -> survivor)
+      const oldVertexIds = face.vertexIds;
+      const newVertexIds = oldVertexIds.map(vid => victimIds.includes(vid) ? survivorId : vid);
+
+      // Remove consecutive duplicates (and circular duplicates)
+      const uniqueVertexIds = [];
+      for (let i = 0; i < newVertexIds.length; i++) {
+        const vid = newVertexIds[i];
+        if (uniqueVertexIds.length === 0 || vid !== uniqueVertexIds[uniqueVertexIds.length - 1]) {
+          uniqueVertexIds.push(vid);
+        }
+      }
+      // Wrap around check
+      if (uniqueVertexIds.length > 1 && uniqueVertexIds[0] === uniqueVertexIds[uniqueVertexIds.length - 1]) {
+        uniqueVertexIds.pop();
+      }
+
+      const matIndex = face.materialIndex;
+
+      // Delete the old face
+      newMeshData.deleteFace(face);
+
+      // Add new face if it still has at least 3 vertices
+      if (uniqueVertexIds.length >= 3) {
+        const vertices = uniqueVertexIds.map(vid => newMeshData.getVertex(vid));
+        newMeshData.addFace(vertices, [], matIndex);
       }
     }
 
+    // Delete victim vertices (deleteFace/deleteEdge should have cleaned up refs)
+    for (const victimId of victimIds) {
+      const victim = newMeshData.getVertex(victimId);
+      if (victim) {
+        // Force cleanup of edges connected to victim that weren't part of faces
+        const edgeIds = Array.from(victim.edgeIds);
+        for (const eid of edgeIds) {
+          const edge = newMeshData.edges.get(eid);
+          if (edge) {
+            // Remap edge if possible, or delete if it would become degenerate
+            const otherId = edge.v1Id === victimId ? edge.v2Id : edge.v1Id;
+            const remappedOtherId = victimIds.includes(otherId) ? survivorId : otherId;
+            
+            newMeshData.deleteEdge(edge);
+
+            if (remappedOtherId !== survivorId) {
+              const v1 = newMeshData.getVertex(survivorId);
+              const v2 = newMeshData.getVertex(remappedOtherId);
+              if (v1 && v2) newMeshData.addEdge(v1, v2);
+            }
+          }
+        }
+        newMeshData.vertices.delete(victimId);
+      }
+    }
+
+    // Final cleanup: remove any degenerate edges or faces that might have slipped through
+    for (const edge of Array.from(newMeshData.edges.values())) {
+      if (edge.v1Id === edge.v2Id) newMeshData.deleteEdge(edge);
+    }
+    
     return newMeshData;
   }
 }

@@ -22,7 +22,7 @@ export class MeshEditDispatcher {
 
       const meshData = editedObject.userData.meshData;
       if (!editedObject || !meshData) return null;
-      this.beforeMeshData = structuredClone(meshData);
+      this.beforeMeshData = MeshData.serializeMeshData(meshData);
 
       const selectedVertexIds = Array.from(this.editSelection.selectedVertexIds);
       const selectedEdgeIds = Array.from(this.editSelection.selectedEdgeIds);
@@ -35,7 +35,7 @@ export class MeshEditDispatcher {
               const newFaceIds = vertexEditor.bridgeFaces(selectedFaceIds[0], selectedFaceIds[1]);
               
               if (newFaceIds) {
-                  this.afterMeshData = structuredClone(meshData);
+                  this.afterMeshData = MeshData.serializeMeshData(meshData);
                   this.editor.execute(new CreateFaceCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
                   this.editSelection.selectFaces(newFaceIds);
               }
@@ -68,7 +68,7 @@ export class MeshEditDispatcher {
       const newVertices = [...newFace.vertexIds];
       const newEdges = [...newFace.edgeIds];
 
-      this.afterMeshData = structuredClone(meshData);
+      this.afterMeshData = MeshData.serializeMeshData(meshData);
       this.editor.execute(new CreateFaceCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
 
       if (mode === 'vertex') {
@@ -87,7 +87,7 @@ export class MeshEditDispatcher {
       const selectedFaceIds = this.editSelection.selectedFaceIds;
 
       const meshData = editedObject.userData.meshData;
-      this.beforeMeshData = structuredClone(meshData);
+      this.beforeMeshData = MeshData.serializeMeshData(meshData);
 
       const vertexEditor = new VertexEditor(this.editor, editedObject);
       if (mode === 'vertex') {
@@ -98,7 +98,7 @@ export class MeshEditDispatcher {
         vertexEditor.deleteSelectionFaces(selectedFaceIds);
       }
 
-      this.afterMeshData = structuredClone(meshData);
+      this.afterMeshData = MeshData.serializeMeshData(meshData);
       this.editor.execute(new DeleteSelectionCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
     });
 
@@ -111,7 +111,7 @@ export class MeshEditDispatcher {
       const selectedFaceIds = this.editSelection.selectedFaceIds;
 
       const meshData = editedObject.userData.meshData;
-      this.beforeMeshData = structuredClone(meshData);
+      this.beforeMeshData = MeshData.serializeMeshData(meshData);
 
       let newVertexIds = [];
       let newEdgeIds = [];
@@ -129,7 +129,7 @@ export class MeshEditDispatcher {
         vertexEditor.deleteSelectionFaces(selectedFaceIds);
       }
 
-      this.afterMeshData = structuredClone(meshData);
+      this.afterMeshData = MeshData.serializeMeshData(meshData);
       this.editor.execute(new SeparateSelectionCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
 
       if (mode === 'vertex') {
