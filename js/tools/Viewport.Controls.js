@@ -60,8 +60,13 @@ export default class ViewportControls {
     this.statusValuesEl = root.querySelector('#operation-values');
     
     this.menuMesh = root.querySelector('#menu-mesh');
+    this.menuAdd = root.querySelector('#menu-add');
+
     if (this.menuMesh) {
         this.menuMesh.classList.toggle('hidden', this.currentMode !== 'edit');
+    }
+    if (this.menuAdd) {
+        this.menuAdd.classList.toggle('hidden', this.currentMode !== 'edit');
     }
 
     if (this.snapMagnet) {
@@ -159,8 +164,12 @@ export default class ViewportControls {
     this.signals.modeChanged.add((newMode) => {
       this.currentMode = newMode;
       
+      const isEdit = newMode === 'edit';
       if (this.menuMesh) {
-          this.menuMesh.classList.toggle('hidden', newMode !== 'edit');
+          this.menuMesh.classList.toggle('hidden', !isEdit);
+      }
+      if (this.menuAdd) {
+          this.menuAdd.classList.toggle('hidden', !isEdit);
       }
 
       if (this.interactionDropdown) {

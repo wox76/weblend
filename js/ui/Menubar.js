@@ -16,8 +16,6 @@ export default class Menubar {
     this.uiLoader.loadComponent('#menu-container', 'components/menu-bar.html', (container) => {
       new MenubarFile(editor);
       new MenubarEdit(editor);
-      new MenubarAdd(editor, container);
-      new MenubarMesh(editor, container);
       new MenubarRender(editor);
       new MenubarHelp(editor);
 

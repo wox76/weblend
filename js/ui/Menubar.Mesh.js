@@ -102,33 +102,6 @@ export class MenubarMesh {
     addListener('.mesh-merge-collapse', 'collapse');
     addListener('.mesh-merge-first', 'first');
     addListener('.mesh-merge-last', 'last');
-
-
-    // --- Merge By Distance Logic ---
-
-    const mergeBtn = this.container.querySelector('#menu-mesh-cleanup-merge');
-    if (mergeBtn) {
-      mergeBtn.addEventListener('click', () => {
-        this.handleMergeByDistance();
-      });
-    }
-
-    
-    // --- Visibility ---
-
-    const addMenu = this.container.querySelector('#menu-add');
-
-    // Update visibility based on mode
-    this.signals.modeChanged.add((mode) => {
-        const isEdit = mode === 'edit';
-        if (meshMenu) meshMenu.style.display = isEdit ? 'block' : 'none';
-        if (addMenu) addMenu.style.display = isEdit ? 'block' : 'none';
-    });
-    
-    // Initial check
-    const isEdit = this.editor.viewportControls && this.editor.viewportControls.currentMode === 'edit';
-    if (meshMenu) meshMenu.style.display = isEdit ? 'block' : 'none';
-    if (addMenu) addMenu.style.display = isEdit ? 'block' : 'none';
   }
 
   handleMergeByDistance() {
