@@ -486,9 +486,9 @@ export class LoopCutTool {
 
   applyLoopCut(meshData, loopEdges, newVertices, isClosedLoop) {
     const newEdges = [];
-    for (let i = 0; i < loopEdges.length; i++) {
+    for (let i = 0; i < loopEdges.length - 1; i++) {
       const edge = loopEdges[i];
-      const nextEdge = loopEdges[(i + 1) % loopEdges.length];
+      const nextEdge = loopEdges[i + 1];
 
       const faces = this.findSharedFaces(meshData, edge, nextEdge);
       
