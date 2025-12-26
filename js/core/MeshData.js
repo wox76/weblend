@@ -292,7 +292,10 @@ export class MeshData {
 
   static serializeMeshData(meshData) {
     if (!meshData) return null;
-    return meshData.toJSON();
+    if (typeof meshData.toJSON === 'function') {
+      return meshData.toJSON();
+    }
+    return meshData; // Assume already serialized
   }
 
   static deserializeMeshData(data, targetObject) {
