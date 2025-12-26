@@ -269,27 +269,42 @@ export class ExtrudeTool {
 
     // Calculate normal and centroid for interaction
     if (mode === 'face' && selectedFaceIds.length > 0) {
-        const vIds = selectedFaceIds.flatMap(faceId => Array.from(meshData.faces.get(faceId).vertexIds));
+        const vIds = selectedFaceIds.flatMap(faceId => {
+            const face = meshData.faces.get(faceId);
+            return face ? Array.from(face.vertexIds) : [];
+        });
         this.extrusionCentroid.copy(getCentroidFromVertices(vIds, meshData));
         this.extrusionNormal.copy(calculateVertexIdsNormal(meshData, vIds));
     } else if (mode === 'edge' && selectedEdgeIds.length > 0) {
         const vIds = selectedEdgeIds.flatMap(edgeId => {
              const e = meshData.edges.get(edgeId);
-             return [e.v1Id, e.v2Id];
+             return e ? [e.v1Id, e.v2Id] : [];
         });
-        const connectedFaceIds = Array.from(selectedEdgeIds.flatMap(edgeId => Array.from(meshData.edges.get(edgeId).faceIds)));
+        const connectedFaceIds = Array.from(selectedEdgeIds.flatMap(edgeId => {
+             const e = meshData.edges.get(edgeId);
+             return e ? Array.from(e.faceIds) : [];
+        }));
         this.extrusionCentroid.copy(getCentroidFromVertices(vIds, meshData));
         if (connectedFaceIds.length > 0) {
-             const faceVIds = connectedFaceIds.flatMap(faceId => Array.from(meshData.faces.get(faceId).vertexIds));
+             const faceVIds = connectedFaceIds.flatMap(faceId => {
+                 const face = meshData.faces.get(faceId);
+                 return face ? Array.from(face.vertexIds) : [];
+             });
              this.extrusionNormal.copy(calculateVertexIdsNormal(meshData, faceVIds));
         } else {
              this.extrusionNormal.set(0, 1, 0);
         }
     } else if (mode === 'vertex' && selectedVertexIds.length > 0) {
         this.extrusionCentroid.copy(getCentroidFromVertices(selectedVertexIds, meshData));
-        const connectedFaceIds = Array.from(selectedVertexIds.flatMap(vId => Array.from(meshData.vertices.get(vId).faceIds)));
+        const connectedFaceIds = Array.from(selectedVertexIds.flatMap(vId => {
+            const vertex = meshData.vertices.get(vId);
+            return vertex ? Array.from(vertex.faceIds) : [];
+        }));
         if (connectedFaceIds.length > 0) {
-             const faceVIds = connectedFaceIds.flatMap(faceId => Array.from(meshData.faces.get(faceId).vertexIds));
+             const faceVIds = connectedFaceIds.flatMap(faceId => {
+                 const face = meshData.faces.get(faceId);
+                 return face ? Array.from(face.vertexIds) : [];
+             });
              this.extrusionNormal.copy(calculateVertexIdsNormal(meshData, faceVIds));
         } else {
              this.extrusionNormal.set(0, 1, 0);
