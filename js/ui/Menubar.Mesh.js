@@ -1,16 +1,20 @@
 import * as THREE from 'three';
 import { MergeSelectionCommand } from '../commands/MergeSelectionCommand.js';
+import { MergeByDistanceCommand } from "../commands/MergeByDistanceCommand.js";
 
 export class MenubarMesh {
-  constructor(editor) {
+  constructor(editor, container) {
     this.editor = editor;
     this.signals = editor.signals;
+    this.container = container || document;
     this.init();
   }
 
   init() {
-    const meshMenu = document.getElementById('menu-mesh');
-    if (!meshMenu) return; // Should not happen if HTML is updated
+    const meshMenu = this.container.querySelector('#menu-mesh');
+    // if (!meshMenu) return; // Might be null if container isn't full doc, but querySelector handles it.
+
+    // --- Merge Selection Logic ---
 
     // Helper to check if we can merge
     const canMerge = () => {
@@ -55,11 +59,8 @@ export class MenubarMesh {
 
       } else if (type === 'cursor') {
         // Use 3D cursor position if available, else (0,0,0)
-        // Assuming editor.cursor or similar exists. 
-        // Since I couldn't find it, using (0,0,0) as placeholder for now.
-        // If there's a cursor helper object, we could use its position.
         const cursor = this.editor.sceneManager.sceneHelpers.getObjectByName('Cursor') || 
-                       this.editor.sceneManager.sceneHelpers.getObjectByName('GridHelper'); // Fallback? No.
+                       this.editor.sceneManager.sceneHelpers.getObjectByName('GridHelper');
         
         if (cursor && cursor.position) {
              targetPos.copy(cursor.position);
@@ -81,20 +82,16 @@ export class MenubarMesh {
         this.editor.execute(cmd);
         
         // Clear selection or select the survivor?
-        // Ideally select the survivor.
-        // We need to know the survivor ID. 
-        // For 'first'/'last' it is known. For others, it's vertexIds[0] (per implementation).
         let survivorId = (type === 'first' || type === 'last') ? targetVertexId : vertexIds[0];
         
-        // Update selection to just the survivor
         this.editor.editSelection.clearSelection();
         this.editor.editSelection.selectVertices([survivorId]);
       }
     };
 
-    // Attach listeners
+    // Attach listeners for Merge Selection
     const addListener = (selector, type) => {
-        const el = meshMenu.querySelector(selector);
+        const el = this.container.querySelector(selector);
         if (el) {
             el.addEventListener('click', () => handleMerge(type));
         }
@@ -105,14 +102,64 @@ export class MenubarMesh {
     addListener('.mesh-merge-collapse', 'collapse');
     addListener('.mesh-merge-first', 'first');
     addListener('.mesh-merge-last', 'last');
+
+
+    // --- Merge By Distance Logic ---
+
+    const mergeBtn = this.container.querySelector('#menu-mesh-cleanup-merge');
+    if (mergeBtn) {
+      mergeBtn.addEventListener('click', () => {
+        this.handleMergeByDistance();
+      });
+    }
+
     
+    // --- Visibility ---
+
     // Update visibility based on mode
     this.signals.modeChanged.add((mode) => {
-        meshMenu.style.display = (mode === 'edit') ? 'block' : 'none';
+        if (meshMenu) meshMenu.style.display = (mode === 'edit') ? 'block' : 'none';
     });
     
     // Initial check
-    meshMenu.style.display = (this.editor.mode === 'edit') ? 'block' : 'none'; // Assuming editor.mode exists, otherwise default hidden
-    if (!this.editor.mode) meshMenu.style.display = 'none'; 
+    if (meshMenu) {
+        meshMenu.style.display = (this.editor.mode === 'edit') ? 'block' : 'none';
+        if (!this.editor.mode) meshMenu.style.display = 'none'; 
+    }
+  }
+
+  handleMergeByDistance() {
+    const object = this.editor.editSelection.editedObject;
+    if (!object || !object.isMesh) {
+      alert("Please enter Edit Mode on a mesh first.");
+      return;
+    }
+
+    const defaultDistance = 0.001;
+
+    // Execute the command first
+    const cmd = new MergeByDistanceCommand(this.editor, object, defaultDistance);
+    this.editor.execute(cmd);
+
+    const updatePanel = (distance, removedCount) => {
+        this.editor.signals.showOperatorPanel.dispatch(
+          'Merge by Distance',
+          {
+            distance: { type: 'number', value: distance, label: 'Distance', step: 0.0001, min: 0 },
+            info: { type: 'info', value: `Removed: ${removedCount} vertices`, label: 'Stats' }
+          },
+          (key, value) => {
+            if (key === 'distance') {
+               this.editor.undo();
+               const newCmd = new MergeByDistanceCommand(this.editor, object, value);
+               this.editor.execute(newCmd);
+               // Re-render panel to show new stats
+               updatePanel(value, newCmd.removedCount);
+            }
+          }
+        );
+    };
+
+    updatePanel(defaultDistance, cmd.removedCount);
   }
 }

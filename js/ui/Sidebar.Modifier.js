@@ -68,6 +68,7 @@ export class SidebarModifier {
         <li class="submenu-item" data-modifier="array">Array</li>
         <li class="submenu-item" data-modifier="mirror">Mirror</li>
         <li class="submenu-item" data-modifier="subdivision_surface">Subdivision Surface</li>
+        <li class="submenu-item" data-modifier="decimate">Decimate</li>
       </ul>
     `;
     document.body.appendChild(this.modifierListDropdown); 
@@ -141,6 +142,8 @@ export class SidebarModifier {
       };
     } else if (type === 'mirror') {
       defaultProperties = { axis: { x: true, y: false, z: false } };
+    } else if (type === 'decimate') {
+      defaultProperties = { ratio: 1.0 };
     }
     this.editor.execute(new AddModifierCommand(this.editor, this.selectedObject, type, defaultProperties, name));
   }
@@ -238,6 +241,14 @@ export class SidebarModifier {
                      btn.style.color = active ? 'white' : '#ccc';
                  }
              });
+        } else if (mod.type === 'decimate') {
+            updateInput('[data-prop="ratio"]', props.ratio);
+            const infoEl = panel.querySelector('.face-count-info');
+            if (infoEl && this.selectedObject && this.selectedObject.geometry) {
+                const geometry = this.selectedObject.geometry;
+                const count = geometry.index ? geometry.index.count / 3 : geometry.attributes.position.count / 3;
+                infoEl.textContent = `Face Count: ${Math.floor(count)}`;
+            }
         }
     });
   }
@@ -310,7 +321,8 @@ export class SidebarModifier {
 
     // Icon
     const icon = document.createElement('img');
-    icon.src = `assets/icons/${modifier.type}.svg`;
+    const iconName = modifier.type === 'decimate' ? 'mod_decim' : modifier.type;
+    icon.src = `assets/icons/${iconName}.svg`;
     icon.className = 'modifier-icon';
     icon.onerror = () => { icon.style.display = 'none'; };
     header.appendChild(icon);
@@ -375,6 +387,8 @@ export class SidebarModifier {
       this.renderSubdivisionSurfaceUI(content, modifier);
     } else if (modifier.type === 'mirror') {
       this.renderMirrorModifierUI(content, modifier);
+    } else if (modifier.type === 'decimate') {
+      this.renderDecimateModifierUI(content, modifier);
     }
 
     // Focus Trap Logic
@@ -566,6 +580,26 @@ export class SidebarModifier {
         newAxis[axis] = !newAxis[axis];
         this.updateModifierProperty(modifier.id, 'axis', newAxis);
     }));
+  }
+
+  renderDecimateModifierUI(container, modifier) {
+    const props = modifier.properties;
+    container.appendChild(this.createNumberRow('Ratio', props.ratio, 0.0, 1.0, 0.01, 'ratio', (val) => {
+        this.updateModifierProperty(modifier.id, 'ratio', val);
+    }));
+
+    const infoRow = document.createElement('div');
+    infoRow.className = 'control-row';
+    infoRow.style.color = '#888';
+    infoRow.style.fontSize = '11px';
+    infoRow.style.justifyContent = 'flex-end';
+    infoRow.style.marginTop = '4px';
+    
+    const faceCountLabel = document.createElement('span');
+    faceCountLabel.className = 'face-count-info';
+    faceCountLabel.textContent = 'Face Count: -';
+    infoRow.appendChild(faceCountLabel);
+    container.appendChild(infoRow);
   }
 
   createAxisSelector(label, valueObj, onToggle) {

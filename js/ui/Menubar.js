@@ -17,7 +17,8 @@ export default class Menubar {
       new MenubarFile(editor);
       new MenubarEdit(editor);
       new MenubarRender(editor);
-      new MenubarMesh(editor);
+      new MenubarMesh(editor, container);
+      new MenubarHelp(editor);
 
       const menuLogo = container.querySelector('.menu-logo');
       if (menuLogo) {

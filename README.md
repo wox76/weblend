@@ -37,6 +37,13 @@ You will find familiar concepts everywhere:
 
 There is still a lot to do to catch up with the giant that is **Blender**, but development is proceeding **extremely fast**. Thanks to the synergy between my coding skills and **Gemini**, features are being added and refined rapidly.
 
+### ✨ Latest Updates
+- **Subdivide Operator:** Divide your geometry with precision using the new Subdivide command in the Edit Mode context menu, complete with an adjustable Operator Panel.
+- **Decimate Modifier:** Optimize your meshes with the new Decimate modifier, allowing you to reduce face count while preserving shape.
+- **Merge by Distance:** Clean up your topology with the "Merge by Distance" tool (Mesh > Clean Up), perfect for removing double vertices.
+- **Enhanced Reference Images:** Improved handling of reference images ensures they remain visible and consistent across Wireframe and Solid shading modes.
+- **Touch Navigation:** A refined mobile experience with improved gesture support: 2-finger rotate/zoom and 3-finger pan.
+
 ## 🛠️ Technology Stack
 - **Core:** Vanilla JavaScript (ES6+) & WebGL
 - **UI:** HTML5 & CSS3 (Custom UI system)

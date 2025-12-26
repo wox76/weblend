@@ -21,6 +21,20 @@ export default class SceneManager {
     this.sceneHelpers = new THREE.Scene();
     this.sceneHelpers.background = null;
 
+    this.currentShadingMode = 'material';
+    this.overrideMaterials = {
+        solid: new THREE.MeshMatcapMaterial({
+            matcap: new THREE.TextureLoader().load('assets/textures/matcaps/040full.jpg'),
+            color: 0xcccccc,
+            side: THREE.DoubleSide
+        }),
+        normal: new THREE.MeshNormalMaterial(),
+        wireframe: new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            wireframe: true
+        })
+    };
+
     this.setupListeners();
   }
   
@@ -89,6 +103,10 @@ export default class SceneManager {
   
   addObject(object, parent, index) {
     if (!object) return;
+    if (typeof object.toJSON !== 'function') {
+        console.error('SceneManager: Attempted to add non-serializable object', object);
+        return;
+    }
 
     if (object.userData.meshData && !(object.userData.meshData instanceof MeshData)) {
       MeshData.rehydrateMeshData(object);
@@ -101,9 +119,28 @@ export default class SceneManager {
       object.parent = parent;
     }
 
+    // Apply current shading (manual override)
     object.traverse((child) => {
       this.addHelper(child);
       this.addCamera(child);
+      
+      // Sanitize material (fix corrupted saves)
+      if (child.isMesh) {
+          if (child.material) {
+              const isArray = Array.isArray(child.material);
+              const isValid = isArray ? child.material.every(m => m && m.isMaterial) : child.material.isMaterial;
+              
+              if (!isValid) {
+                  console.warn('Sanitized corrupted material on object:', child.name);
+                  child.material = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+              }
+          } else {
+              // No material? Default.
+              child.material = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+          }
+      }
+
+      this.applyShading(child, this.currentShadingMode);
     });
 
     this.signals.objectAdded.dispatch();
@@ -119,6 +156,32 @@ export default class SceneManager {
     
     object.parent.remove(object);
     this.signals.objectRemoved.dispatch();
+  }
+
+  applyShading(object, mode) {
+      if (!object.isMesh) return;
+      if (object.userData.isReference) return; // SKIP REFERENCES
+
+      if (mode === 'material') {
+          // Restore
+          const original = object.userData.originalMaterial;
+          if (original) {
+              // Safety check: Ensure original is a valid Material instance
+              if (original.isMaterial || (Array.isArray(original) && original[0].isMaterial)) {
+                  object.material = original;
+              } else {
+                  console.warn('Restoring invalid material from userData (corruption), resetting to default.', original);
+                  object.material = new THREE.MeshStandardMaterial({color: 0xcccccc});
+              }
+              delete object.userData.originalMaterial;
+          }
+      } else {
+          // Override
+          if (!object.userData.originalMaterial) {
+              object.userData.originalMaterial = object.material;
+          }
+          object.material = this.overrideMaterials[mode];
+      }
   }
 
   setupListeners() {
@@ -146,28 +209,12 @@ export default class SceneManager {
     });
 
     this.signals.viewportShadingChanged.add((value) => {
-      switch (value) {
-        case 'material':
-          this.mainScene.overrideMaterial = null;
-          break;
-        case 'solid':
-          const matcapTexture = new THREE.TextureLoader().load('assets/textures/matcaps/040full.jpg');
-          this.mainScene.overrideMaterial = new THREE.MeshMatcapMaterial({
-            matcap: matcapTexture,
-            color: 0xcccccc,
-            side: THREE.DoubleSide
-          });
-          break;
-        case 'normal':
-          this.mainScene.overrideMaterial = new THREE.MeshNormalMaterial();
-          break;
-        case 'wireframe':
-          this.mainScene.overrideMaterial = new THREE.MeshBasicMaterial({
-            color: 0x000000,
-            wireframe: true
-          });
-          break;
-      }
+      this.currentShadingMode = value;
+      this.mainScene.overrideMaterial = null; // Ensure no global override
+
+      this.mainScene.traverse((obj) => {
+          this.applyShading(obj, value);
+      });
     });
   }
 

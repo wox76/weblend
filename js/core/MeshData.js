@@ -323,4 +323,34 @@ export class MeshData {
   toAngleBasedGeometry(angleDegree = 60, useEarcut = true) {
     return generateAngleBasedGeometry(this, angleDegree, useEarcut);
   }
+
+  static fromBufferGeometry(geometry) {
+    const meshData = new MeshData();
+    const pos = geometry.getAttribute('position');
+    const index = geometry.getIndex();
+    
+    // Add all vertices
+    const newVertices = [];
+    for (let i = 0; i < pos.count; i++) {
+        newVertices.push(meshData.addVertex({ x: pos.getX(i), y: pos.getY(i), z: pos.getZ(i) }));
+    }
+
+    // Add faces
+    if (index) {
+        for (let i = 0; i < index.count; i += 3) {
+            const a = index.getX(i);
+            const b = index.getX(i+1);
+            const c = index.getX(i+2);
+            // Verify indices are valid
+            if (newVertices[a] && newVertices[b] && newVertices[c]) {
+                meshData.addFace([newVertices[a], newVertices[b], newVertices[c]]);
+            }
+        }
+    } else {
+        for (let i = 0; i < pos.count; i += 3) {
+            meshData.addFace([newVertices[i], newVertices[i+1], newVertices[i+2]]);
+        }
+    }
+    return meshData;
+  }
 }

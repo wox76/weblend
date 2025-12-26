@@ -3,6 +3,7 @@ import { VertexEditor } from './VertexEditor.js';
 import { SwitchModeCommand } from '../commands/SwitchModeCommand.js';
 import { SwitchSubModeCommand } from '../commands/SwitchSubModeCommand.js';
 import { MenubarAdd } from '../ui/Menubar.Add.js';
+import { MenubarMesh } from '../ui/Menubar.Mesh.js';
 import { MenubarObject } from '../ui/Menubar.Object.js';
 import { MenubarView } from '../ui/Menubar.View.js';
 import { MenubarSelect } from '../ui/Menubar.Select.js';
@@ -34,6 +35,7 @@ export default class ViewportControls {
       // Initialize Menus moved to Viewport Header
       new MenubarView(this.editor);
       new MenubarAdd(this.editor, container);
+      new MenubarMesh(this.editor, container);
       new MenubarObject(this.editor, container);
       new MenubarSelect(this.editor);
       new MenubarHelp(this.editor);
@@ -56,6 +58,11 @@ export default class ViewportControls {
     this.statusEl = root.querySelector('#operation-status');
     this.statusNameEl = root.querySelector('#operation-name');
     this.statusValuesEl = root.querySelector('#operation-values');
+    
+    this.menuMesh = root.querySelector('#menu-mesh');
+    if (this.menuMesh) {
+        this.menuMesh.classList.toggle('hidden', this.currentMode !== 'edit');
+    }
 
     if (this.snapMagnet) {
       this.snapMagnet.addEventListener('click', () => {
@@ -151,6 +158,10 @@ export default class ViewportControls {
 
     this.signals.modeChanged.add((newMode) => {
       this.currentMode = newMode;
+      
+      if (this.menuMesh) {
+          this.menuMesh.classList.toggle('hidden', newMode !== 'edit');
+      }
 
       if (this.interactionDropdown) {
         this.interactionDropdown.value = newMode;

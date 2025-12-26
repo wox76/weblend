@@ -18,6 +18,7 @@ export class QuaternionOrbitControls {
 
 		this._state = null;
 
+		this.domElement.style.touchAction = 'none'; // Disable browser touch handling
 		this._bindEvents();
 	}
 
@@ -28,6 +29,10 @@ export class QuaternionOrbitControls {
 	_bindEvents() {
 		this.domElement.addEventListener('mousedown', this._onMouseDown.bind(this));
 		this.domElement.addEventListener('wheel', this._onMouseWheel.bind(this));
+
+		this.domElement.addEventListener('touchstart', this._onTouchStart.bind(this), { passive: false });
+		this.domElement.addEventListener('touchmove', this._onTouchMove.bind(this), { passive: false });
+		this.domElement.addEventListener('touchend', this._onTouchEnd.bind(this), { passive: false });
 	}
 
 	_getMouseOnCircle(x, y) {
@@ -75,19 +80,103 @@ export class QuaternionOrbitControls {
 		if (!this.enabled) return;
 		event.preventDefault();
 
-		this._zoom(event);
+		const delta = event.deltaY > 0 ? 1 : -1;
+		const factor = 1 + delta * 0.1 * this.zoomSpeed;
+		this._performZoom(factor);
 	}
 
-	_zoom(event) {
-		const delta = event.deltaY > 0 ? 1 : -1;
-
+	_performZoom(factor) {
 		this.eye.subVectors(this.camera.position, this.target);
-
-		const zoomFactor = 1 + delta * 0.1 * this.zoomSpeed;
-
-		this.eye.multiplyScalar(zoomFactor);
+		this.eye.multiplyScalar(factor);
 		this.camera.position.copy(this.target).add(this.eye);
 		this.camera.lookAt(this.target);
+	}
+
+	_onTouchStart(event) {
+		if (!this.enabled) return;
+
+		if (event.touches.length === 2) {
+			this._state = 'touch-multi';
+			this._touchType = null;
+			
+			const center = this._getTouchCenter(event.touches);
+			this.movePrev.copy(this._getMouseOnCircle(center.x, center.y));
+            this._touchStartCenter = center;
+
+			const dx = event.touches[0].clientX - event.touches[1].clientX;
+			const dy = event.touches[0].clientY - event.touches[1].clientY;
+			this._touchPrevDist = Math.sqrt(dx * dx + dy * dy);
+            this._touchStartDist = this._touchPrevDist;
+		} else if (event.touches.length === 3) {
+            this._state = 'pan';
+            const center = this._getTouchCenter(event.touches);
+            this.movePrev.copy(this._getMouseOnCircle(center.x, center.y));
+        }
+	}
+
+	_onTouchMove(event) {
+		if (!this.enabled) return;
+        // 1 finger does nothing (allows selection/tools interaction)
+
+		if (event.touches.length === 2 && this._state === 'touch-multi') {
+            event.preventDefault();
+			const center = this._getTouchCenter(event.touches);
+            const dx = event.touches[0].clientX - event.touches[1].clientX;
+			const dy = event.touches[0].clientY - event.touches[1].clientY;
+			const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (!this._touchType) {
+                const distChange = Math.abs(dist - this._touchStartDist);
+                const panChange = Math.sqrt(Math.pow(center.x - this._touchStartCenter.x, 2) + Math.pow(center.y - this._touchStartCenter.y, 2));
+                const threshold = 5;
+
+                if (distChange > threshold || panChange > threshold) {
+                    if (distChange > panChange) {
+                        this._touchType = 'zoom';
+                    } else {
+                        this._touchType = 'orbit'; // 2 fingers move together -> Rotate
+                    }
+                }
+            }
+
+            if (this._touchType === 'orbit') {
+                this.moveCurr.copy(this._getMouseOnCircle(center.x, center.y));
+			    this._rotateCamera();
+			    this.movePrev.copy(this.moveCurr);
+                this._touchPrevDist = dist; 
+            } else if (this._touchType === 'zoom') {
+                if (this._touchPrevDist > 0) {
+				    const factor = this._touchPrevDist / dist;
+				    this._performZoom(factor);
+			    }
+			    this._touchPrevDist = dist;
+                this.movePrev.copy(this._getMouseOnCircle(center.x, center.y));
+            }
+		} else if (event.touches.length === 3 && this._state === 'pan') {
+            event.preventDefault();
+            const center = this._getTouchCenter(event.touches);
+            this.moveCurr.copy(this._getMouseOnCircle(center.x, center.y));
+            this._panCamera();
+            this.movePrev.copy(this.moveCurr);
+        }
+	}
+
+    _onTouchEnd(event) {
+        if (event.touches.length < 2) {
+             this._state = null;
+        }
+    }
+
+	_getTouchCenter(touches) {
+        let x = 0, y = 0;
+        for (let i = 0; i < touches.length; i++) {
+            x += touches[i].clientX;
+            y += touches[i].clientY;
+        }
+		return {
+			x: x / touches.length,
+			y: y / touches.length
+		};
 	}
 
 	_panCamera() {

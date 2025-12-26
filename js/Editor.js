@@ -30,6 +30,7 @@ import ViewportNavigation from './tools/Viewport.Navigation.js';
 import { SplashScreen } from './ui/SplashScreen.js';
 import { SettingsPanel } from './ui/SettingsPanel.js';
 import { NumberDragger } from './ui/NumberDragger.js';
+import { OperatorPanel } from './ui/OperatorPanel.js';
 
 export default class Editor {
   constructor() {
@@ -74,6 +75,8 @@ export default class Editor {
       
       renderImage: new Signal(),
       textureAdded: new Signal(),
+
+      showOperatorPanel: new Signal(),
     }
 
     this.helpers = {};
@@ -108,6 +111,7 @@ export default class Editor {
     this.splashScreen = new SplashScreen(this);
     this.settingsPanel = new SettingsPanel(this);
     this.numberDragger = new NumberDragger(this);
+    this.operatorPanel = new OperatorPanel(this);
 
     this.clock = new THREE.Clock();
 
@@ -215,6 +219,45 @@ export default class Editor {
   }
 
   toJSON() {
+    const currentShading = this.sceneManager.currentShadingMode;
+    // Temporarily revert to material mode to save clean state (removes non-clonable userData.originalMaterial)
+    if (currentShading !== 'material') {
+        this.signals.viewportShadingChanged.dispatch('material');
+    }
+
+    // Sanitize scene before serialization to prevent crash
+    const scene = this.sceneManager.mainScene;
+    
+    // Recursive sanitization function
+    const sanitizeObject = (obj) => {
+        if (!obj) return;
+        
+        // Sanitize userData
+        if (obj.userData) {
+            for (const key in obj.userData) {
+                const val = obj.userData[key];
+                // Remove functions or Three.js instances that cause CloneError
+                if (typeof val === 'function' || (val && typeof val === 'object' && (val.isMaterial || val.isTexture || val.isObject3D))) {
+                    delete obj.userData[key];
+                }
+            }
+        }
+        
+        if (obj.children) {
+            for (let i = obj.children.length - 1; i >= 0; i--) {
+                const child = obj.children[i];
+                if (typeof child.toJSON !== 'function') {
+                    console.warn('Editor: Removing invalid object:', child);
+                    obj.remove(child);
+                } else {
+                    sanitizeObject(child);
+                }
+            }
+        }
+    };
+    
+    sanitizeObject(scene);
+
     const json = {
       metadata: {
         version: 1.0,
@@ -227,6 +270,11 @@ export default class Editor {
 
     if (this.config.get('history')) {
       json.history = this.history.toJSON();
+    }
+
+    // Restore shading mode
+    if (currentShading !== 'material') {
+        this.signals.viewportShadingChanged.dispatch(currentShading);
     }
 
     return json;

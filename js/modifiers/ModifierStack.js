@@ -2,6 +2,7 @@ import { MeshData } from '../core/MeshData.js';
 import { ArrayModifier } from './ArrayModifier.js';
 import { MirrorModifier } from './MirrorModifier.js';
 import { SubdivisionSurfaceModifier } from './SubdivisionSurfaceModifier.js';
+import { DecimateModifier } from './DecimateModifier.js';
 
 export class ModifierStack {
   constructor() {
@@ -9,6 +10,7 @@ export class ModifierStack {
     this.register(ArrayModifier);
     this.register(MirrorModifier);
     this.register(SubdivisionSurfaceModifier);
+    this.register(DecimateModifier);
   }
 
   register(modifierClass) {

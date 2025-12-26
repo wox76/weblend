@@ -1,6 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" xml:space="preserve">
-    <g fill="#ffffff">
-        <path fill="#ffffff" d="M74.492 262.992a.5.5 0 0 0-.1.012l-4.9.004a.5.5 0 0 0-.5.5v10a.5.5 0 1 0 1 0V269H74.5a.5.5 0 0 0 .5-.5v-4.498l4.5-.002a.5.5 0 1 0 0-1l-4.893.004a.5.5 0 0 0-.115-.012zM74 264.004V268h-4.008v-3.994z" transform="translate(-65.996 -260)"/>
-        <path fill="#ffffff" d="M250.484 284a.5.5 0 0 0-.338.146l-13.007 13.008a.5.5 0 0 0 .353.854L250.5 298a.5.5 0 0 0 .5-.5v-13a.5.5 0 0 0-.516-.5zm-.484 1.707V297l-11.3.008z" transform="translate(-233.996 -281)"/>
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <path fill="white" d="M1 1h6v6H1V1zm1 1v4h4V2H2zM9 1h6v6H9V1zm1 1v4h4V2h-4zM1 9h6v6H1V9zm1 1v4h4v-4H2zM11 9l-2 2 2 2 2-2-2-2z"/>
 </svg>

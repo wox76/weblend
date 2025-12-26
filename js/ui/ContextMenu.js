@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RemoveObjectCommand } from "../commands/RemoveObjectCommand.js";
 import { SetShadingCommand } from "../commands/SetShadingCommand.js";
+import { SubdivideCommand } from "../commands/SubdivideCommand.js";
 
 export default class ContextMenu {
   constructor( editor ) {
@@ -60,6 +61,14 @@ export default class ContextMenu {
 
   show(x, y) {
     if (!this.menuEl) return;
+    
+    // Toggle Subdivide based on mode
+    const isEditMode = this.editor.viewportControls && this.editor.viewportControls.currentMode === 'edit';
+    const subItem = this.menuEl.querySelector('#ctx-subdivide');
+    const subDiv = this.menuEl.querySelector('#ctx-subdivide-divider');
+    if (subItem) subItem.style.display = isEditMode ? 'block' : 'none';
+    if (subDiv) subDiv.style.display = isEditMode ? 'block' : 'none';
+
     this.containerEl.classList.add('active'); // Activate container
     this.menuEl.style.display = 'block';
     this.menuEl.style.position = 'absolute';
@@ -77,6 +86,25 @@ export default class ContextMenu {
   handleAction(action) {
     const objects = this.selection.selectedObjects;
     if (!objects || objects.length === 0) return;
+
+    if (action === 'subdivide') {
+        const cmd = new SubdivideCommand(this.editor, 1);
+        this.editor.execute(cmd);
+        
+        this.editor.signals.showOperatorPanel.dispatch(
+            'Subdivide',
+            {
+                cuts: { type: 'number', value: 1, min: 1, max: 10, step: 1, label: 'Number of Cuts' }
+            },
+            (key, value) => {
+                if (key === 'cuts') {
+                    this.editor.undo();
+                    this.editor.execute(new SubdivideCommand(this.editor, value));
+                }
+            }
+        );
+        return;
+    }
 
     if (action === 'delete') {
       objects.forEach(obj => {

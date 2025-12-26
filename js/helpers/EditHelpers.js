@@ -32,6 +32,7 @@ export default class EditHelpers {
   }
 
   addVertexPoints(selectedObject) {
+    if (!selectedObject.userData.meshData) return;
     const meshData = selectedObject.userData.meshData;
     const positions = [];
     const colors = [];
@@ -151,6 +152,7 @@ export default class EditHelpers {
   }
 
   addFacePolygons(selectedObject) {
+    if (!selectedObject.userData.meshData) return;
     const meshData = selectedObject.userData.meshData;
     const positions = [];
     const colors = [];
