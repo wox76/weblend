@@ -38,6 +38,7 @@ export class KeyHandler {
   setupListeners() {
     this.signals.modeChanged.add((newMode) => {
       this.currentMode = newMode;
+      this.extruding = false; // Reset extruding state on mode change
     });
 
     this.signals.modalExtrudeEnded.add(() => {
@@ -154,7 +155,7 @@ export class KeyHandler {
             this.editor.execute(new AddObjectCommand(this.editor, clone));
           });
         }
-      } else if (event.key === 'Delete' || event.key === 'x') {
+      } else if (event.key === 'Delete' || event.key.toLowerCase() === 'x') {
         this.signals.objectDeleted.dispatch();
       } else if (event.shiftKey && event.key.toLowerCase() === this.shortcuts['focus']) {
         this.signals.objectFocused.dispatch();
@@ -186,7 +187,7 @@ export class KeyHandler {
           this.editor.editSelection.invert();
       } else if (event.key === 'f') {
         this.signals.createFaceFromVertices.dispatch();
-      } else if (event.key === 'Delete' || event.key === 'x') {
+      } else if (event.key === 'Delete' || event.key.toLowerCase() === 'x') {
         this.signals.deleteSelectedFaces.dispatch();
       } else if (event.key.toLowerCase() === 'm') {
         this.editor.mergeMenu.show(this.mouse.x, this.mouse.y);
