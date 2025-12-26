@@ -116,16 +116,19 @@ export class MenubarMesh {
     
     // --- Visibility ---
 
+    const addMenu = this.container.querySelector('#menu-add');
+
     // Update visibility based on mode
     this.signals.modeChanged.add((mode) => {
-        if (meshMenu) meshMenu.style.display = (mode === 'edit') ? 'block' : 'none';
+        const isEdit = mode === 'edit';
+        if (meshMenu) meshMenu.style.display = isEdit ? 'block' : 'none';
+        if (addMenu) addMenu.style.display = isEdit ? 'block' : 'none';
     });
     
     // Initial check
-    if (meshMenu) {
-        meshMenu.style.display = (this.editor.mode === 'edit') ? 'block' : 'none';
-        if (!this.editor.mode) meshMenu.style.display = 'none'; 
-    }
+    const isEdit = this.editor.viewportControls && this.editor.viewportControls.currentMode === 'edit';
+    if (meshMenu) meshMenu.style.display = isEdit ? 'block' : 'none';
+    if (addMenu) addMenu.style.display = isEdit ? 'block' : 'none';
   }
 
   handleMergeByDistance() {
