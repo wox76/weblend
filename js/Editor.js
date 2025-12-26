@@ -277,7 +277,7 @@ export default class Editor {
         this.signals.viewportShadingChanged.dispatch(currentShading);
     }
 
-    return json;
+    return JSON.parse(JSON.stringify(json));
   }
 
   objectByUuid(uuid) {
