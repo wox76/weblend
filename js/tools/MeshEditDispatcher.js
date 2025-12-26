@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { MeshData } from '../core/MeshData.js';
 import { VertexEditor } from './VertexEditor.js';
 import { getSortedVertexIds } from '../utils/SortUtils.js';
 import { getNeighborFaces, shouldFlipNormal } from '../utils/AlignedNormalUtils.js';
