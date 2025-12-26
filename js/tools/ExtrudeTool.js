@@ -100,7 +100,7 @@ export class ExtrudeTool {
       const vertexEditor = new VertexEditor(this.editor, editedObject);
       vertexEditor.updateGeometryAndHelpers();
       const meshData = editedObject.userData.meshData;
-      this.afterMeshData = MeshData.serializeMeshData(meshData);
+      this.afterMeshData = structuredClone(meshData);
 
       this.editor.execute(new ExtrudeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
 
@@ -217,7 +217,7 @@ export class ExtrudeTool {
     const vertexEditor = new VertexEditor(this.editor, editedObject);
     vertexEditor.updateGeometryAndHelpers(); // Ensure all changes are applied
     const meshData = editedObject.userData.meshData;
-    this.afterMeshData = MeshData.serializeMeshData(meshData);
+    this.afterMeshData = structuredClone(meshData);
 
     this.editor.execute(new ExtrudeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
 
@@ -249,8 +249,7 @@ export class ExtrudeTool {
     // Revert changes by setting meshData back to beforeMeshData
     const editedObject = this.editSelection.editedObject;
     const vertexEditor = new VertexEditor(this.editor, editedObject);
-    const beforeData = MeshData.deserializeMeshData(this.beforeMeshData);
-    vertexEditor.applyMeshData(beforeData);
+    vertexEditor.applyMeshData(this.beforeMeshData);
     vertexEditor.updateGeometryAndHelpers();
     this.signals.objectChanged.dispatch();
     this.signals.modalExtrudeEnded.dispatch();
@@ -260,7 +259,7 @@ export class ExtrudeTool {
     const editedObject = this.editSelection.editedObject;
     const vertexEditor = new VertexEditor(this.editor, editedObject);
     const meshData = editedObject.userData.meshData;
-    this.beforeMeshData = MeshData.serializeMeshData(meshData);
+    this.beforeMeshData = structuredClone(meshData);
 
     const mode = this.editSelection.subSelectionMode;
     const selectedVertexIds = Array.from(this.editSelection.selectedVertexIds);
