@@ -31,6 +31,7 @@ import { SplashScreen } from './ui/SplashScreen.js';
 import { SettingsPanel } from './ui/SettingsPanel.js';
 import { NumberDragger } from './ui/NumberDragger.js';
 import { OperatorPanel } from './ui/OperatorPanel.js';
+import { MergeMenu } from './ui/MergeMenu.js';
 
 export default class Editor {
   constructor() {
@@ -112,6 +113,7 @@ export default class Editor {
     this.settingsPanel = new SettingsPanel(this);
     this.numberDragger = new NumberDragger(this);
     this.operatorPanel = new OperatorPanel(this);
+    this.mergeMenu = new MergeMenu(this);
 
     this.clock = new THREE.Clock();
 

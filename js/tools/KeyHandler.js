@@ -188,6 +188,8 @@ export class KeyHandler {
         this.signals.createFaceFromVertices.dispatch();
       } else if (event.key === 'Delete' || event.key === 'x') {
         this.signals.deleteSelectedFaces.dispatch();
+      } else if (event.key.toLowerCase() === 'm') {
+        this.editor.mergeMenu.show(this.mouse.x, this.mouse.y);
       } else if (event.key === 'p') {
         this.signals.separateSelection.dispatch();
       } else if (event.key === 'Tab') {
