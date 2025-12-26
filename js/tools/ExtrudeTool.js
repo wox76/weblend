@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { TransformControls } from 'jsm/controls/TransformControls.js';
 import { VertexEditor } from './VertexEditor.js';
+import { MeshData } from '../core/MeshData.js';
 import { calculateVertexIdsNormal, getCentroidFromVertices, getEdgeMidpoint } from '../utils/AlignedNormalUtils.js';
 import { ExtrudeCommand } from '../commands/ExtrudeCommand.js';
 import { Signal } from '../utils/Signals.js';

@@ -133,7 +133,12 @@ export class SidebarModifier {
         endCaps: false,
       };
     } else if (type === 'subdivision_surface') {
-      defaultProperties = { levels: 1, renderLevels: 1 };
+      defaultProperties = { 
+          levels: 1, 
+          renderLevels: 1, 
+          subdivisionType: 'catmull-clark', 
+          optimalDisplay: false 
+      };
     } else if (type === 'mirror') {
       defaultProperties = { axis: { x: true, y: false, z: false } };
     }
@@ -220,7 +225,10 @@ export class SidebarModifier {
                  updateInput('[data-prop="relativeOffsetVec.z"]', props.relativeOffsetVec?.z ?? 0);
             }
         } else if (mod.type === 'subdivision_surface') {
+            updateInput('[data-prop="subdivisionType"]', props.subdivisionType || 'catmull-clark');
             updateInput('[data-prop="levels"]', props.levels);
+            updateInput('[data-prop="renderLevels"]', props.renderLevels);
+            updateInput('[data-prop="optimalDisplay"]', props.optimalDisplay);
         } else if (mod.type === 'mirror') {
              ['x', 'y', 'z'].forEach(axis => {
                  const btn = panel.querySelector(`button[data-prop="axis.${axis}"]`);
@@ -483,8 +491,70 @@ export class SidebarModifier {
 
   renderSubdivisionSurfaceUI(container, modifier) {
     const props = modifier.properties;
-    container.appendChild(this.createNumberRow('Levels', props.levels, 0, 6, 1, 'levels', (val) => {
+    
+    // Type Selection (Catmull-Clark / Simple)
+    const typeContainer = document.createElement('div');
+    typeContainer.className = 'control-row';
+    typeContainer.style.background = '#303030';
+    typeContainer.style.borderRadius = '3px';
+    typeContainer.style.padding = '2px';
+    typeContainer.style.marginBottom = '8px';
+    typeContainer.style.display = 'flex';
+    
+    const types = [
+        { id: 'catmull-clark', label: 'Catmull-Clark' },
+        { id: 'simple', label: 'Simple' }
+    ];
+    
+    types.forEach(type => {
+        const btn = document.createElement('div');
+        btn.textContent = type.label;
+        btn.style.flex = '1';
+        btn.style.textAlign = 'center';
+        btn.style.padding = '4px 0';
+        btn.style.cursor = 'pointer';
+        btn.style.fontSize = '11px';
+        btn.style.borderRadius = '2px';
+        
+        if ((props.subdivisionType || 'catmull-clark') === type.id) {
+            btn.style.backgroundColor = '#545454';
+            btn.style.color = '#fff';
+            btn.style.fontWeight = 'bold';
+        } else {
+            btn.style.color = '#aaa';
+        }
+        
+        btn.onclick = () => {
+             this.updateModifierProperty(modifier.id, 'subdivisionType', type.id);
+        };
+        
+        typeContainer.appendChild(btn);
+    });
+    container.appendChild(typeContainer);
+
+    // Levels
+    const levelsGroup = document.createElement('div');
+    levelsGroup.style.marginBottom = '5px';
+    const levelsHeader = document.createElement('div');
+    levelsHeader.textContent = 'Levels';
+    levelsHeader.style.color = '#ccc';
+    levelsHeader.style.fontSize = '11px';
+    levelsHeader.style.marginBottom = '2px';
+    levelsGroup.appendChild(levelsHeader);
+    
+    levelsGroup.appendChild(this.createNumberRow('Viewport', props.levels, 0, 6, 1, 'levels', (val) => {
         this.updateModifierProperty(modifier.id, 'levels', val);
+    }));
+    
+    levelsGroup.appendChild(this.createNumberRow('Render', props.renderLevels ?? 1, 0, 6, 1, 'renderLevels', (val) => {
+        this.updateModifierProperty(modifier.id, 'renderLevels', val);
+    }));
+    
+    container.appendChild(levelsGroup);
+
+    // Optimal Display
+    container.appendChild(this.createCheckboxRow('Optimal Display', props.optimalDisplay || false, 'optimalDisplay', (val) => {
+        this.updateModifierProperty(modifier.id, 'optimalDisplay', val);
     }));
   }
 
@@ -543,6 +613,29 @@ export class SidebarModifier {
 
       div.appendChild(group);
       return div;
+  }
+
+  // --- UI Helper functions ---
+  createCheckboxRow(label, value, dataProp, onChange) {
+    const div = document.createElement('div');
+    div.className = 'control-row';
+    div.style.justifyContent = 'space-between';
+    div.style.alignItems = 'center';
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'control-label';
+    labelSpan.textContent = label;
+    
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = value;
+    if (dataProp) input.dataset.prop = dataProp;
+    
+    input.addEventListener('change', (e) => onChange(e.target.checked));
+    
+    div.appendChild(labelSpan);
+    div.appendChild(input);
+    return div;
   }
 
   // --- UI Helper functions ---

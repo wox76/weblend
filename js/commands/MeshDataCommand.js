@@ -1,4 +1,5 @@
 import { VertexEditor } from '../tools/VertexEditor.js';
+import { MeshData } from '../core/MeshData.js';
 
 export class MeshDataCommand {
   /**
@@ -14,8 +15,8 @@ export class MeshDataCommand {
     this.name = name;
     this.objectUuid = object ? object.uuid : null;
 
-    this.beforeMeshData = beforeMeshData ? structuredClone(beforeMeshData) : null;
-    this.afterMeshData = afterMeshData ? structuredClone(afterMeshData) : null;
+    this.beforeMeshData = beforeMeshData ? MeshData.deserializeMeshData(MeshData.serializeMeshData(beforeMeshData)) : null;
+    this.afterMeshData = afterMeshData ? MeshData.deserializeMeshData(MeshData.serializeMeshData(afterMeshData)) : null;
   }
 
   execute() {

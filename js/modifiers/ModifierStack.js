@@ -1,12 +1,14 @@
 import { MeshData } from '../core/MeshData.js';
 import { ArrayModifier } from './ArrayModifier.js';
 import { MirrorModifier } from './MirrorModifier.js';
+import { SubdivisionSurfaceModifier } from './SubdivisionSurfaceModifier.js';
 
 export class ModifierStack {
   constructor() {
     this.modifiers = new Map();
     this.register(ArrayModifier);
     this.register(MirrorModifier);
+    this.register(SubdivisionSurfaceModifier);
   }
 
   register(modifierClass) {

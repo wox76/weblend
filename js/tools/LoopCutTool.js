@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { MeshData } from '../core/MeshData.js';
 import { getNeighborFaces, calculateFaceNormal, calculateVerticesNormal} from '../utils/AlignedNormalUtils.js';
 import { LoopCutCommand } from '../commands/LoopCutCommand.js';
 import { SwitchSubModeCommand } from '../commands/SwitchSubModeCommand.js';
@@ -240,14 +241,14 @@ export class LoopCutTool {
 
     const { meshData, loopEdges, isClosedLoop } = this.currentLoopData;
     
-    this.beforeMeshData = structuredClone(meshData);
+    this.beforeMeshData = MeshData.deserializeMeshData(MeshData.serializeMeshData(meshData));
 
     const positions = this.calculateLoopVertices(meshData, loopEdges, isClosedLoop, this.slideFactor);
     
     const newVertices = positions.map(p => meshData.addVertex(p));
     const newEdges = this.applyLoopCut(meshData, loopEdges, newVertices, isClosedLoop);
 
-    this.afterMeshData = structuredClone(meshData);
+    this.afterMeshData = MeshData.deserializeMeshData(MeshData.serializeMeshData(meshData));
     this.editor.execute(new LoopCutCommand(this.editor, this.editedObject, this.beforeMeshData, this.afterMeshData));
     
     // Switch to Edge Mode
@@ -473,13 +474,14 @@ export class LoopCutTool {
       : [...leftLoop.reverse(), startEdge, ...rightLoop];
   }
 
-  findSharedFace(meshData, edgeA, edgeB) {
+  findSharedFaces(meshData, edgeA, edgeB) {
+    const shared = [];
     for (let fId of edgeA.faceIds) {
       if (edgeB.faceIds.has(fId)) {
-        return meshData.faces.get(fId);
+        shared.push(meshData.faces.get(fId));
       }
     }
-    return null;
+    return shared;
   }
 
   applyLoopCut(meshData, loopEdges, newVertices, isClosedLoop) {
@@ -488,44 +490,48 @@ export class LoopCutTool {
       const edge = loopEdges[i];
       const nextEdge = loopEdges[(i + 1) % loopEdges.length];
 
-      const face = this.findSharedFace(meshData, edge, nextEdge);
-      const originalFaceNormal = calculateFaceNormal(meshData, face);
+      const faces = this.findSharedFaces(meshData, edge, nextEdge);
+      
+      // We must process all shared faces (e.g. if mesh has duplicate geometry or internal faces)
+      for (const face of faces) {
+          const originalFaceNormal = calculateFaceNormal(meshData, face);
+          meshData.deleteFace(face);
 
-      if (face) {
-        meshData.deleteFace(face);
+          const midVertex = newVertices[i];
+          const nextMidVertex = (isClosedLoop && i === newVertices.length - 1) ? newVertices[0] : newVertices[(i + 1) % loopEdges.length];
+
+          const sameDirection = !!meshData.getEdge(edge.v1Id, nextEdge.v1Id);
+
+          let quad1, quad2;
+
+          const v1 = meshData.getVertex(edge.v1Id);
+          const v2 = meshData.getVertex(edge.v2Id);
+          const nextV1 = meshData.getVertex(nextEdge.v1Id);
+          const nextV2 = meshData.getVertex(nextEdge.v2Id);
+
+          if (sameDirection) {
+            quad1 = [v1, nextV1, nextMidVertex, midVertex];
+            quad2 = [midVertex, nextMidVertex, nextV2, v2];
+          } else {
+            quad1 = [v1, nextV2, nextMidVertex, midVertex];
+            quad2 = [midVertex, nextMidVertex, nextV1, v2];
+          }
+
+          [quad1, quad2].forEach(quad => {
+            const normal = calculateVerticesNormal(quad);
+            if (normal.dot(originalFaceNormal) < 0) {
+              quad.reverse();
+            }
+            meshData.addFace(quad);
+          });
       }
 
-      const midVertex = newVertices[i];
-      const nextMidVertex = (isClosedLoop && i === newVertices.length - 1) ? newVertices[0] : newVertices[(i + 1) % loopEdges.length];
-
-      if (!face) continue;
-      const sameDirection = !!meshData.getEdge(edge.v1Id, nextEdge.v1Id);
-
-      let quad1, quad2;
-
-      const v1 = meshData.getVertex(edge.v1Id);
-      const v2 = meshData.getVertex(edge.v2Id);
-      const nextV1 = meshData.getVertex(nextEdge.v1Id);
-      const nextV2 = meshData.getVertex(nextEdge.v2Id);
-
-      if (sameDirection) {
-        quad1 = [v1, nextV1, nextMidVertex, midVertex];
-        quad2 = [v2, nextV2, nextMidVertex, midVertex];
-      } else {
-        quad1 = [v1, nextV2, nextMidVertex, midVertex];
-        quad2 = [v2, nextV1, nextMidVertex, midVertex];
-      }
-
-      [quad1, quad2].forEach(quad => {
-        const normal = calculateVerticesNormal(quad);
-        if (normal.dot(originalFaceNormal) < 0) {
-          quad.reverse();
-        }
-        meshData.addFace(quad);
-      });
-
-      const splitEdge = meshData.getEdge(midVertex.id, nextMidVertex.id);
-      if (splitEdge) newEdges.push(splitEdge);
+      // Add split edge (only once is enough, but it connects the midpoints)
+      // Check if it exists first
+      const splitEdge = meshData.getEdge(newVertices[i].id, 
+          (isClosedLoop && i === newVertices.length - 1) ? newVertices[0].id : newVertices[(i + 1) % loopEdges.length].id
+      );
+      if (splitEdge && !newEdges.includes(splitEdge)) newEdges.push(splitEdge);
     }
 
     // Handle the first and last edges for open loops

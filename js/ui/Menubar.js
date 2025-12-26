@@ -4,6 +4,7 @@ import { MenubarRender } from './Menubar.Render.js';
 import { MenubarAdd } from './Menubar.Add.js';
 import { MenubarView } from './Menubar.View.js';
 import { MenubarHelp } from './Menubar.Help.js';
+import { MenubarMesh } from './Menubar.Mesh.js';
 
 export default class Menubar {
   constructor( editor ) {
@@ -16,6 +17,7 @@ export default class Menubar {
       new MenubarFile(editor);
       new MenubarEdit(editor);
       new MenubarRender(editor);
+      new MenubarMesh(editor);
 
       const menuLogo = container.querySelector('.menu-logo');
       if (menuLogo) {
