@@ -52,10 +52,35 @@
         <li class="preferences">Preferences...</li>
       </ul>
     </li>
-    <li class="menu-item">Render
+    <li class="menu-item">Add
       <ul class="submenu">
-        <li class="render-image">📷 Render Image
-          <span class="shortcut">SHIFT+F12</span>
+        <li class="submenu-item">
+          Mesh <span class="arrow">&#9656;</span>
+          <ul class="submenu right">
+            <li data-geometry="Cube">Cube</li>
+            <li data-geometry="Plane">Plane</li>
+            <li data-geometry="UVSphere">UV Sphere</li>
+            <li data-geometry="IcoSphere">Ico Sphere</li>
+            <li data-geometry="Cylinder">Cylinder</li>
+            <li data-geometry="Torus">Torus</li>
+            <li data-geometry="Monkey">Monkey</li>
+          </ul>
+        </li>
+        <li class="submenu-item">
+          Light <span class="arrow">&#9656;</span>
+          <ul class="submenu right">
+            <li data-light="PointLight">Point Light</li>
+            <li data-light="DirectionalLight">Directional Light</li>
+            <li data-light="SpotLight">Spot Light</li>
+            <li data-light="HemisphereLight">Hemisphere Light</li>
+          </ul>
+        </li>
+        <li class="submenu-item">
+          Camera <span class="arrow">&#9656;</span>
+          <ul class="submenu right">
+            <li data-camera="Perspective">Perspective</li>
+            <li data-camera="Orthographic">Orthographic</li>
+          </ul>
         </li>
       </ul>
     </li>
@@ -76,6 +101,13 @@
           <ul class="submenu right">
             <li id="menu-mesh-cleanup-merge">Merge by Distance</li>
           </ul>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">Render
+      <ul class="submenu">
+        <li class="render-image">📷 Render Image
+          <span class="shortcut">SHIFT+F12</span>
         </li>
       </ul>
     </li>
