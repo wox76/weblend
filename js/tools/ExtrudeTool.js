@@ -330,6 +330,18 @@ export class ExtrudeTool {
     vertexEditor.updateGeometryAndHelpers();
     this.initialDuplicatedPositions = vertexEditor.getVertexPositions(this.newVertexIds);
 
+    // Nudge vertices to prevent degenerate faces (0-area) during initial creation.
+    // This ensures that triangulation (even simple fan) generates valid indices and normals.
+    if (this.newVertexIds.length > 0) {
+      const normalMatrix = new THREE.Matrix3().getNormalMatrix(this.editSelection.editedObject.matrixWorld);
+      const nudge = this.extrusionNormal.clone().applyMatrix3(normalMatrix).normalize().multiplyScalar(0.0001);
+      
+      if (nudge.lengthSq() < 1e-10) nudge.set(0, 0.0001, 0);
+
+      const nudgedPositions = this.initialDuplicatedPositions.map(pos => pos.clone().add(nudge));
+      vertexEditor.setVerticesWorldPositions(this.newVertexIds, nudgedPositions);
+    }
+
     this.boundaryEdges = vertexEditor.getBoundaryEdges(meshData, selectedVertexIds, selectedEdgeIds, selectedFaceIds);
 
     // Recreate side faces
@@ -358,6 +370,21 @@ export class ExtrudeTool {
 
         if (testNormal.dot(sideFaceNormal) < 0) {
           sideFaceVertexIds.reverse();
+        }
+      } else {
+        const oldFaceId = Array.from(edge.faceIds)[0];
+        if (oldFaceId !== undefined) {
+          const oldFace = meshData.faces.get(oldFaceId);
+          if (oldFace) {
+            const vIds = oldFace.vertexIds;
+            const idx1 = vIds.indexOf(edge.v1Id);
+            if (idx1 !== -1) {
+              const idx2 = (idx1 + 1) % vIds.length;
+              if (vIds[idx2] === edge.v2Id) {
+                sideFaceVertexIds.reverse();
+              }
+            }
+          }
         }
       }
 
