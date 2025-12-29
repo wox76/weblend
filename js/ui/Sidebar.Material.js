@@ -101,9 +101,10 @@ export class SidebarMaterial {
 
   getMaterialsArray() {
       if (!this.selectedObject.material) return [];
-      return Array.isArray(this.selectedObject.material) 
+      const mats = Array.isArray(this.selectedObject.material) 
           ? this.selectedObject.material 
           : [this.selectedObject.material];
+      return [...mats];
   }
 
   updateMaterialArray(newArray) {
@@ -111,8 +112,6 @@ export class SidebarMaterial {
           const defaultMat = new THREE.MeshStandardMaterial({ name: 'Default', color: 0xffffff });
           this.registerMaterial(defaultMat);
           this.editor.execute(new SetValueCommand(this.editor, this.selectedObject, 'material', defaultMat));
-      } else if (newArray.length === 1) {
-          this.editor.execute(new SetValueCommand(this.editor, this.selectedObject, 'material', newArray[0]));
       } else {
           this.editor.execute(new SetValueCommand(this.editor, this.selectedObject, 'material', newArray));
       }
