@@ -132,11 +132,17 @@ export class SidebarMaterial {
           const item = document.createElement('div');
           item.className = 'material-slot';
           if (index === this.activeSlotIndex) item.classList.add('active');
-          item.addEventListener('mousedown', (e) => { 
+          
+          const selectSlot = (e) => {
               e.stopPropagation();
+              if (this.activeSlotIndex === index) return;
               this.activeSlotIndex = index; 
               this.refreshUI(); 
-          });
+          };
+
+          item.addEventListener('mousedown', selectSlot);
+          item.addEventListener('click', (e) => e.stopPropagation()); // Block click to prevent side effects
+          
           const icon = document.createElement('span');
           icon.className = 'slot-icon';
           if (mat && mat.color) icon.style.backgroundColor = '#' + mat.color.getHexString();
