@@ -124,7 +124,11 @@ export class SidebarMaterial {
           const item = document.createElement('div');
           item.className = 'material-slot';
           if (index === this.activeSlotIndex) item.classList.add('active');
-          item.addEventListener('click', () => { this.activeSlotIndex = index; this.refreshUI(); });
+          item.addEventListener('click', (e) => { 
+              e.stopPropagation();
+              this.activeSlotIndex = index; 
+              this.refreshUI(); 
+          });
           const icon = document.createElement('span');
           icon.className = 'slot-icon';
           if (mat && mat.color) icon.style.backgroundColor = '#' + mat.color.getHexString();
@@ -143,7 +147,8 @@ export class SidebarMaterial {
       const addBtn = document.createElement('div');
       addBtn.className = 'slot-btn'; addBtn.textContent = '+';
       addBtn.style.borderRadius = '3px 3px 0 0'; // Top corners
-      addBtn.addEventListener('click', () => {
+      addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
           const mats = this.getMaterialsArray();
           // Use Physical for IOR support
           const newMat = new THREE.MeshPhysicalMaterial({ name: 'Material', color: Math.random() * 0xffffff });
@@ -155,7 +160,8 @@ export class SidebarMaterial {
       const removeBtn = document.createElement('div');
       removeBtn.className = 'slot-btn'; removeBtn.textContent = '-';
       removeBtn.style.borderRadius = '0 0 3px 3px'; // Bottom corners
-      removeBtn.addEventListener('click', () => {
+      removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
           const mats = this.getMaterialsArray();
           if (mats.length === 0) return;
           const newArray = [...mats];
