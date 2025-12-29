@@ -356,12 +356,19 @@ export class ExtrudeTool {
       vertexEditor.setVerticesWorldPositions(this.newVertexIds, nudgedPositions);
     }
 
-    this.boundaryEdges = vertexEditor.getBoundaryEdges(meshData, selectedVertexIds, selectedEdgeIds, selectedFaceIds);
+    this.boundaryEdges = vertexEditor.getBoundaryEdges(
+        meshData, 
+        selectedVertexIds, 
+        mode === 'edge' ? selectedEdgeIds : [], 
+        mode === 'face' ? selectedFaceIds : []
+    );
 
     // Recreate side faces
     for (let i = 0; i < this.boundaryEdges.length; i++) {
       const edge = this.boundaryEdges[i];
       const newEdge = meshData.getEdge(this.mappedVertexIds[edge.v1Id], this.mappedVertexIds[edge.v2Id]);
+
+      if (!newEdge) continue;
 
       const sideFaceVertexIds = [edge.v1Id, edge.v2Id, this.mappedVertexIds[edge.v2Id], this.mappedVertexIds[edge.v1Id]];
 
