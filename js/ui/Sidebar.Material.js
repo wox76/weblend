@@ -149,8 +149,8 @@ export class SidebarMaterial {
           const newMat = new THREE.MeshPhysicalMaterial({ name: 'Material', color: Math.random() * 0xffffff });
           this.registerMaterial(newMat);
           const newArray = [...mats, newMat];
-          this.updateMaterialArray(newArray);
           this.activeSlotIndex = newArray.length - 1;
+          this.updateMaterialArray(newArray);
       });
       const removeBtn = document.createElement('div');
       removeBtn.className = 'slot-btn'; removeBtn.textContent = '-';
