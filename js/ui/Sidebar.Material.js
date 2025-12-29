@@ -57,6 +57,7 @@ export class SidebarMaterial {
         this.selectedObject.userData.activeMaterialIndex = 0;
     }
     const activeSlotIndex = this.selectedObject.userData.activeMaterialIndex;
+    this.activeSlotIndex = activeSlotIndex;
 
     const materials = this.getMaterialsArray();
     

@@ -856,6 +856,10 @@ export class TransformTool {
           this.vertexEditor.setVerticesWorldPositions(selectedVertexIds, newPositions);
         }
       }
+
+      if (this.transformControls.dragging) {
+        this.signals.refreshSidebarObject.dispatch();
+      }
     });
 
     this.transformControls.addEventListener('mouseUp', () => {

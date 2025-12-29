@@ -78,6 +78,7 @@ export default class Editor {
       textureAdded: new Signal(),
 
       showOperatorPanel: new Signal(),
+      refreshSidebarObject: new Signal(),
     }
 
     this.helpers = {};
