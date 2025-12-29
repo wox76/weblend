@@ -18,6 +18,7 @@ export class SidebarMaterial {
 
   setupListeners() {
     const updateSelection = (modeOverride = null) => {
+        console.log('updateSelection called, resetting activeSlotIndex to 0');
         this.currentMode = modeOverride || (this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object');
         if (this.currentMode === 'edit') {
             this.selectedObject = this.editor.editSelection.editedObject;
@@ -98,6 +99,7 @@ export class SidebarMaterial {
   }
 
   updateMaterialArray(newArray) {
+      console.log('updateMaterialArray new length:', newArray.length);
       if (newArray.length === 0) {
           const defaultMat = new THREE.MeshStandardMaterial({ name: 'Default', color: 0xffffff });
           this.registerMaterial(defaultMat);
@@ -125,6 +127,7 @@ export class SidebarMaterial {
           item.className = 'material-slot';
           if (index === this.activeSlotIndex) item.classList.add('active');
           item.addEventListener('click', (e) => { 
+              console.log('SLOT CLICKED index:', index);
               e.stopPropagation();
               this.activeSlotIndex = index; 
               this.refreshUI(); 
@@ -148,6 +151,7 @@ export class SidebarMaterial {
       addBtn.className = 'slot-btn'; addBtn.textContent = '+';
       addBtn.style.borderRadius = '3px 3px 0 0'; // Top corners
       addBtn.addEventListener('click', (e) => {
+          console.log('ADD BTN CLICKED');
           e.stopPropagation();
           const mats = this.getMaterialsArray();
           // Use Physical for IOR support
@@ -161,6 +165,7 @@ export class SidebarMaterial {
       removeBtn.className = 'slot-btn'; removeBtn.textContent = '-';
       removeBtn.style.borderRadius = '0 0 3px 3px'; // Bottom corners
       removeBtn.addEventListener('click', (e) => {
+          console.log('REMOVE BTN CLICKED activeIndex:', this.activeSlotIndex);
           e.stopPropagation();
           const mats = this.getMaterialsArray();
           if (mats.length === 0) return;
