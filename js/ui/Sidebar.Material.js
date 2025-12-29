@@ -10,7 +10,6 @@ export class SidebarMaterial {
     this.signals = editor.signals;
     this.container = document.getElementById('material-properties-content');
     this.selectedObject = null;
-    this.activeSlotIndex = 0;
     this.currentMode = 'object';
 
     this.setupListeners();
@@ -30,7 +29,6 @@ export class SidebarMaterial {
 
         if (this.selectedObject !== newObject) {
             this.selectedObject = newObject;
-            this.activeSlotIndex = 0; 
             this.refreshUI();
         } else if (this.selectedObject) {
             // Object same, just refresh UI in case of mode change affecting visibility of actions
@@ -55,6 +53,11 @@ export class SidebarMaterial {
     
     if (!this.selectedObject || !this.selectedObject.isMesh) return;
 
+    if (this.selectedObject.userData.activeMaterialIndex === undefined) {
+        this.selectedObject.userData.activeMaterialIndex = 0;
+    }
+    const activeSlotIndex = this.selectedObject.userData.activeMaterialIndex;
+
     const materials = this.getMaterialsArray();
     
     // Slots Wrapper (Flex row)
@@ -63,11 +66,11 @@ export class SidebarMaterial {
     slotsWrapper.style.margin = '5px 10px';
     slotsWrapper.style.gap = '2px';
 
-    const listElement = this.renderSlots(materials);
+    const listElement = this.renderSlots(materials, activeSlotIndex);
     listElement.style.flex = '1';
     listElement.style.margin = '0'; // Reset margin as wrapper handles it
     
-    const controlsElement = this.renderSlotControls();
+    const controlsElement = this.renderSlotControls(activeSlotIndex);
     controlsElement.style.display = 'flex';
     controlsElement.style.flexDirection = 'column';
     controlsElement.style.margin = '0';
@@ -78,22 +81,22 @@ export class SidebarMaterial {
     this.container.appendChild(slotsWrapper);
 
     if (this.currentMode === 'edit') {
-        this.renderMaterialActions();
+        this.renderMaterialActions(activeSlotIndex);
     }
 
-    const activeMaterial = (materials.length > 0 && this.activeSlotIndex < materials.length) 
-        ? materials[this.activeSlotIndex] 
+    const activeMaterial = (materials.length > 0 && activeSlotIndex < materials.length) 
+        ? materials[activeSlotIndex] 
         : null;
 
     if (activeMaterial) {
-        this.renderMaterialSelector(activeMaterial);
+        this.renderMaterialSelector(activeMaterial, activeSlotIndex);
         // Preview section placeholder
         this.createSection('Preview', true); // Collapsed by default
         
-        this.renderSurface(activeMaterial);
+        this.renderSurface(activeMaterial, activeSlotIndex);
         // Settings/etc can be added here or inside Surface if mimicking exact layout
     } else if (materials.length > 0) {
-        this.renderEmptySlotSelector();
+        this.renderEmptySlotSelector(activeSlotIndex);
     } else {
         this.renderNoSlotsUI();
     }
@@ -135,13 +138,13 @@ export class SidebarMaterial {
           
           const selectSlot = (e) => {
               e.stopPropagation();
-              if (this.activeSlotIndex === index) return;
-              this.activeSlotIndex = index; 
+              const currentIndex = this.selectedObject.userData.activeMaterialIndex;
+              if (currentIndex === index) return;
+              this.selectedObject.userData.activeMaterialIndex = index; 
               this.refreshUI(); 
           };
 
-          item.addEventListener('mousedown', selectSlot);
-          item.addEventListener('click', (e) => e.stopPropagation()); // Block click to prevent side effects
+          item.addEventListener('click', selectSlot);
           
           const icon = document.createElement('span');
           icon.className = 'slot-icon';
@@ -155,7 +158,7 @@ export class SidebarMaterial {
       return list;
   }
 
-  renderSlotControls() {
+  renderSlotControls(activeSlotIndex) {
       const div = document.createElement('div');
       div.className = 'slot-controls';
       const addBtn = document.createElement('div');
@@ -168,7 +171,7 @@ export class SidebarMaterial {
           const newMat = new THREE.MeshPhysicalMaterial({ name: 'Material', color: Math.random() * 0xffffff });
           this.registerMaterial(newMat);
           const newArray = [...mats, newMat];
-          this.activeSlotIndex = newArray.length - 1;
+          this.selectedObject.userData.activeMaterialIndex = newArray.length - 1;
           this.updateMaterialArray(newArray);
       });
       const removeBtn = document.createElement('div');
@@ -179,8 +182,10 @@ export class SidebarMaterial {
           const mats = this.getMaterialsArray();
           if (mats.length === 0) return;
           const newArray = [...mats];
-          newArray.splice(this.activeSlotIndex, 1);
-          if (this.activeSlotIndex >= newArray.length) this.activeSlotIndex = Math.max(0, newArray.length - 1);
+          newArray.splice(activeSlotIndex, 1);
+          if (activeSlotIndex >= newArray.length) {
+              this.selectedObject.userData.activeMaterialIndex = Math.max(0, newArray.length - 1);
+          }
           this.updateMaterialArray(newArray);
       });
       div.appendChild(addBtn); div.appendChild(removeBtn);
@@ -247,7 +252,7 @@ export class SidebarMaterial {
       this.container.appendChild(div);
   }
 
-  renderMaterialSelector(material) {
+  renderMaterialSelector(material, activeSlotIndex) {
       const row = document.createElement('div');
       row.className = 'material-selector-row';
       
@@ -324,7 +329,7 @@ export class SidebarMaterial {
               contentSpan.addEventListener('click', () => {
                   const mats = this.getMaterialsArray();
                   const newArray = [...mats];
-                  newArray[this.activeSlotIndex] = mat; 
+                  newArray[activeSlotIndex] = mat; 
                   this.updateMaterialArray(newArray);
                   dropdown.remove();
               });
@@ -402,7 +407,7 @@ export class SidebarMaterial {
       input.className = 'material-name-input';
       input.value = material.name;
       input.addEventListener('change', () => {
-          this.editor.execute(new SetMaterialValueCommand(this.editor, this.selectedObject, 'name', input.value, this.activeSlotIndex));
+          this.editor.execute(new SetMaterialValueCommand(this.editor, this.selectedObject, 'name', input.value, activeSlotIndex));
       });
       row.appendChild(input);
       const unlinkBtn = document.createElement('button');
@@ -412,7 +417,7 @@ export class SidebarMaterial {
           this.registerMaterial(newMat);
           const mats = this.getMaterialsArray();
           const newArray = [...mats];
-          newArray[this.activeSlotIndex] = newMat; 
+          newArray[activeSlotIndex] = newMat; 
           this.updateMaterialArray(newArray);
       });
       row.appendChild(unlinkBtn);
