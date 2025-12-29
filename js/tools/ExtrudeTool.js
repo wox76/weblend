@@ -366,9 +366,11 @@ export class ExtrudeTool {
     // Recreate side faces
     for (let i = 0; i < this.boundaryEdges.length; i++) {
       const edge = this.boundaryEdges[i];
+      if (!edge || !edge.faceIds) continue;
+
       const newEdge = meshData.getEdge(this.mappedVertexIds[edge.v1Id], this.mappedVertexIds[edge.v2Id]);
 
-      if (!newEdge) continue;
+      if (!newEdge || !newEdge.faceIds) continue;
 
       const sideFaceVertexIds = [edge.v1Id, edge.v2Id, this.mappedVertexIds[edge.v2Id], this.mappedVertexIds[edge.v1Id]];
 
