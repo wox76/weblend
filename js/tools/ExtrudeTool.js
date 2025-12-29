@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { TransformControls } from 'jsm/controls/TransformControls.js';
 import { VertexEditor } from './VertexEditor.js';
 import { MeshData } from '../core/MeshData.js';
-import { calculateVertexIdsNormal, getCentroidFromVertices, getEdgeMidpoint } from '../utils/AlignedNormalUtils.js';
+import { calculateVertexIdsNormal, calculateFaceNormal, getCentroidFromVertices, getEdgeMidpoint } from '../utils/AlignedNormalUtils.js';
 import { ExtrudeCommand } from '../commands/ExtrudeCommand.js';
 import { Signal } from '../utils/Signals.js';
 
@@ -268,12 +268,26 @@ export class ExtrudeTool {
 
     // Calculate normal and centroid for interaction
     if (mode === 'face' && selectedFaceIds.length > 0) {
-        const vIds = selectedFaceIds.flatMap(faceId => {
+        const vIds = [];
+        const normalSum = new THREE.Vector3();
+        
+        selectedFaceIds.forEach(faceId => {
             const face = meshData.faces.get(faceId);
-            return face ? Array.from(face.vertexIds) : [];
+            if (face) {
+                face.vertexIds.forEach(vid => vIds.push(vid));
+                const n = calculateFaceNormal(meshData, face);
+                normalSum.add(n);
+            }
         });
+
         this.extrusionCentroid.copy(getCentroidFromVertices(vIds, meshData));
-        this.extrusionNormal.copy(calculateVertexIdsNormal(meshData, vIds));
+        
+        if (normalSum.lengthSq() > 0.0001) {
+            this.extrusionNormal.copy(normalSum.normalize());
+        } else {
+            // Fallback for balanced selections (e.g. ring, sphere) where sum is zero
+            this.extrusionNormal.set(0, 1, 0); 
+        }
     } else if (mode === 'edge' && selectedEdgeIds.length > 0) {
         const vIds = selectedEdgeIds.flatMap(edgeId => {
              const e = meshData.edges.get(edgeId);
