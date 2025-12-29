@@ -21,8 +21,8 @@ export class SidebarModifier {
   }
 
   setupListeners() {
-    const updateSelection = () => {
-        const mode = this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object';
+    const updateSelection = (modeOverride = null) => {
+        const mode = modeOverride || (this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object');
         if (mode === 'edit') {
             this.selectedObject = this.editor.editSelection.editedObject;
         } else {
@@ -34,7 +34,7 @@ export class SidebarModifier {
     };
 
     this.editor.signals.objectSelected.add(updateSelection);
-    this.editor.signals.modeChanged.add(updateSelection);
+    this.editor.signals.modeChanged.add((mode) => updateSelection(mode));
 
     this.editor.signals.objectChanged.add((obj) => {
       if (this.selectedObject === obj) {

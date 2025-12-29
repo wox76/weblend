@@ -11,14 +11,15 @@ export class SidebarMaterial {
     this.container = document.getElementById('material-properties-content');
     this.selectedObject = null;
     this.activeSlotIndex = 0;
+    this.currentMode = 'object';
 
     this.setupListeners();
   }
 
   setupListeners() {
-    const updateSelection = () => {
-        const mode = this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object';
-        if (mode === 'edit') {
+    const updateSelection = (modeOverride = null) => {
+        this.currentMode = modeOverride || (this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object');
+        if (this.currentMode === 'edit') {
             this.selectedObject = this.editor.editSelection.editedObject;
         } else {
             const selected = this.editor.selection.selectedObjects;
@@ -29,7 +30,7 @@ export class SidebarMaterial {
     };
 
     this.signals.objectSelected.add(updateSelection);
-    this.signals.modeChanged.add(updateSelection);
+    this.signals.modeChanged.add((mode) => updateSelection(mode));
 
     this.signals.objectChanged.add(() => {
       this.refreshUI();
@@ -67,7 +68,7 @@ export class SidebarMaterial {
     slotsWrapper.appendChild(controlsElement);
     this.container.appendChild(slotsWrapper);
 
-    if (this.editor.viewportControls && this.editor.viewportControls.currentMode === 'edit') {
+    if (this.currentMode === 'edit') {
         this.renderMaterialActions();
     }
 

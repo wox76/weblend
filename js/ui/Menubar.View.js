@@ -32,6 +32,14 @@ export class MenubarView {
       })
     });
 
+    const shadingItems = document.querySelectorAll('.menu-shading-item');
+    shadingItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const mode = item.dataset.shading;
+            if (mode) this.signals.viewportShadingChanged.dispatch(mode);
+        });
+    });
+
     const fullscreenBtn = document.querySelector('.fullscreen');
     if (fullscreenBtn) {
       fullscreenBtn.addEventListener('click', () => {

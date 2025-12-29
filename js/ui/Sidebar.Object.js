@@ -37,7 +37,7 @@ export class SidebarObject {
     this.emptyMessage.style.display = this.lastSelectedObject ? 'none' : 'block';
     this.objectSettingList.style.display = this.lastSelectedObject ? 'block' : 'none';
 
-    const updateSelection = () => {
+    const updateSelection = (modeOverride = null) => {
         const inputs = Array.from(document.querySelectorAll('.properties-content .number-input, .properties-content .text-input, .properties-content .color-input'));
         inputs.forEach(input => {
             if (document.activeElement === input) {
@@ -45,7 +45,7 @@ export class SidebarObject {
             }
         });
 
-        const mode = this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object';
+        const mode = modeOverride || (this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object');
         let object = null;
         let count = 0;
 
@@ -85,9 +85,10 @@ export class SidebarObject {
     };
 
     this.signals.objectSelected.add(updateSelection);
-    this.signals.modeChanged.add(updateSelection);
+    this.signals.modeChanged.add((mode) => updateSelection(mode));
 
     this.signals.objectChanged.add(() => this.updateFields(this.lastSelectedObject));
+    this.signals.refreshSidebarObject.add(() => this.updateFields(this.lastSelectedObject));
   }
 
   getOptionsFor(object) {

@@ -40,9 +40,8 @@ export default class SidebarProperties {
       this.updateTabVisibility(selectedObjects);
     });
 
-    this.signals.modeChanged.add(() => {
-      // Pass current selection or handle inside updateTabVisibility
-      this.updateTabVisibility(this.editor.selection.selectedObjects);
+    this.signals.modeChanged.add((mode) => {
+      this.updateTabVisibility(this.editor.selection.selectedObjects, mode);
     });
   }
 
@@ -61,11 +60,11 @@ export default class SidebarProperties {
     }
   }
 
-  updateTabVisibility(selectedObjects) {
+  updateTabVisibility(selectedObjects, modeOverride = null) {
     let object = null;
     let count = 0;
 
-    const mode = this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object';
+    const mode = modeOverride || (this.editor.viewportControls ? this.editor.viewportControls.currentMode : 'object');
 
     if (mode === 'edit') {
         object = this.editor.editSelection.editedObject;
