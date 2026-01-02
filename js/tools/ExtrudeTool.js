@@ -349,17 +349,8 @@ export class ExtrudeTool {
     vertexEditor.updateGeometryAndHelpers();
     this.initialDuplicatedPositions = vertexEditor.getVertexPositions(this.newVertexIds);
 
-    // Nudge vertices to prevent degenerate faces (0-area) during initial creation.
-    // This ensures that triangulation (even simple fan) generates valid indices and normals.
-    if (this.newVertexIds.length > 0) {
-      const normalMatrix = new THREE.Matrix3().getNormalMatrix(this.editSelection.editedObject.matrixWorld);
-      const nudge = this.extrusionNormal.clone().applyMatrix3(normalMatrix).normalize().multiplyScalar(0.0001);
-      
-      if (nudge.lengthSq() < 1e-10) nudge.set(0, 0.0001, 0);
-
-      const nudgedPositions = this.initialDuplicatedPositions.map(pos => pos.clone().add(nudge));
-      vertexEditor.setVerticesWorldPositions(this.newVertexIds, nudgedPositions);
-    }
+    // Nudge removed to prevent subdivision artifacts at 0 distance.
+    // 0-area faces are handled safely by NormalCalculator (ignored).
 
     this.boundaryEdges = vertexEditor.getBoundaryEdges(
         meshData, 
