@@ -267,9 +267,19 @@ export class ExtrudeTool {
     this.beforeMeshData = MeshData.serializeMeshData(meshData);
 
     const mode = this.editSelection.subSelectionMode;
-    const selectedVertexIds = Array.from(this.editSelection.selectedVertexIds);
+    let selectedVertexIds = Array.from(this.editSelection.selectedVertexIds);
     const selectedEdgeIds = Array.from(this.editSelection.selectedEdgeIds);
     const selectedFaceIds = Array.from(this.editSelection.selectedFaceIds);
+
+    // Robustness: Ensure selectedVertexIds includes all vertices of selected faces
+    if (mode === 'face') {
+        const vSet = new Set(selectedVertexIds);
+        for (const fId of selectedFaceIds) {
+            const f = meshData.faces.get(fId);
+            if (f) f.vertexIds.forEach(vid => vSet.add(vid));
+        }
+        selectedVertexIds = Array.from(vSet);
+    }
 
     // Calculate normal and centroid for interaction
     if (mode === 'face' && selectedFaceIds.length > 0) {
@@ -374,21 +384,26 @@ export class ExtrudeTool {
 
       if (faceId !== undefined) {
         const face = meshData.faces.get(faceId);
-        const faceCentroid = getCentroidFromVertices(face.vertexIds, meshData);
-        const newEdgeMidpoint = getEdgeMidpoint(newEdge, meshData);
+        const nv1 = this.mappedVertexIds[edge.v1Id];
+        const nv2 = this.mappedVertexIds[edge.v2Id];
 
-        const sideFaceNormal = new THREE.Vector3().subVectors(newEdgeMidpoint, faceCentroid);
-        if (sideFaceNormal.lengthSq() > 0) sideFaceNormal.normalize();
+        if (nv1 === undefined || nv2 === undefined) continue;
 
-        const faceNormal = calculateVertexIdsNormal(meshData, face.vertexIds);
-        const edgeVector = new THREE.Vector3().subVectors(meshData.getVertex(edge.v2Id).position, meshData.getVertex(edge.v1Id).position);
-        if (edgeVector.lengthSq() > 0) edgeVector.normalize();
+        // Robust topological check:
+        // If the Cap Face goes nv1 -> nv2, then our Side Face (v1 -> v2 -> nv2 -> nv1)
+        // produces a top edge (nv2 -> nv1) which opposes the Cap Face edge (nv1 -> nv2).
+        // This is correct for manifold meshes.
+        // So, if Aligned (nv1 -> nv2), do NOTHING.
+        // If Opposed (nv2 -> nv1), REVERSE.
 
-        const testNormal = new THREE.Vector3().crossVectors(edgeVector, faceNormal);
-        if (testNormal.lengthSq() > 0) testNormal.normalize();
+        const vIds = face.vertexIds;
+        const idx1 = vIds.indexOf(nv1);
+        
+        // Check if nv2 follows nv1 (wrapping around)
+        const isAligned = (vIds[(idx1 + 1) % vIds.length] === nv2);
 
-        if (testNormal.dot(sideFaceNormal) < 0) {
-          sideFaceVertexIds.reverse();
+        if (!isAligned) {
+            sideFaceVertexIds.reverse();
         }
       } else {
         const oldFaceId = Array.from(edge.faceIds)[0];
@@ -407,7 +422,25 @@ export class ExtrudeTool {
         }
       }
 
-      vertexEditor.createFaceFromVertices(sideFaceVertexIds);
+      // Find the source face (from selection) to inherit material from
+      let sourceFace = null;
+      if (mode === 'face') {
+        for (const fid of edge.faceIds) {
+             if (selectedFaceIds.includes(fid)) {
+                 sourceFace = meshData.faces.get(fid);
+                 break;
+             }
+        }
+      } else {
+        // Fallback for non-face modes: just pick first face
+        const fid = Array.from(edge.faceIds)[0];
+        if (fid !== undefined) sourceFace = meshData.faces.get(fid);
+      }
+
+      const materialIndex = sourceFace ? sourceFace.materialIndex : 0;
+      // UVs for side faces are complex to generate automatically without projection, keeping empty for now.
+
+      vertexEditor.createFaceFromVertices(sideFaceVertexIds, [], materialIndex);
     }
 
     // Handle isolated vertices

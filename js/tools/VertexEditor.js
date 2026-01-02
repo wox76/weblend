@@ -345,7 +345,7 @@ export class VertexEditor {
 
       if (!newVertices.every(v => v)) continue;
 
-      const newFace = meshData.addFace(newVertices);
+      const newFace = meshData.addFace(newVertices, oldFace.uvs, oldFace.materialIndex);
       duplicatedFaces.set(faceId, newFace);
     }
 
@@ -521,7 +521,7 @@ export class VertexEditor {
     };
   }
 
-  createFaceFromVertices(vertexIds) {
+  createFaceFromVertices(vertexIds, uvs = [], materialIndex = 0) {
     const meshData = this.object.userData.meshData;
     if (!meshData || !vertexIds || vertexIds.length < 3) {
       return null;
@@ -530,7 +530,7 @@ export class VertexEditor {
     const vertices = vertexIds.map(id => meshData.getVertex(id)).filter(v => v !== undefined);
     if (vertices.length < 3) return null;
 
-    const newFace = meshData.addFace(vertices);
+    const newFace = meshData.addFace(vertices, uvs, materialIndex);
 
     return newFace ? newFace.id : null;
   }

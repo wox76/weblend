@@ -1,4 +1,4 @@
-import { ShadingUtils } from "../utils/ShadingUtils.js";
+import { VertexEditor } from "../tools/VertexEditor.js";
 
 export class SetShadingCommand {
   static type = 'SetShadingCommand';
@@ -23,13 +23,19 @@ export class SetShadingCommand {
   execute() {
     this.object = this.editor.objectByUuid(this.objectUuid);
     this.object.userData.shading = this.newMode;
-    ShadingUtils.applyShading(this.object, this.newMode);
+    
+    // Use VertexEditor to update geometry, ensuring modifiers are respected
+    const vertexEditor = new VertexEditor(this.editor, this.object);
+    vertexEditor.updateGeometryAndHelpers();
   }
 
   undo() {
     this.object = this.editor.objectByUuid(this.objectUuid);
     this.object.userData.shading = this.oldMode;
-    ShadingUtils.applyShading(this.object, this.oldMode);
+    
+    // Use VertexEditor to update geometry, ensuring modifiers are respected
+    const vertexEditor = new VertexEditor(this.editor, this.object);
+    vertexEditor.updateGeometryAndHelpers();
   }
 
   toJSON() {
