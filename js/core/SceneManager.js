@@ -72,6 +72,9 @@ export default class SceneManager {
   }
 
   setScene(scene) {
+    // Clear existing scene to prevent duplicates and state pollution
+    this.emptyScene(this.mainScene);
+
     scene.traverse(obj => {
       MeshData.rehydrateMeshData(obj);
     });
@@ -167,18 +170,33 @@ export default class SceneManager {
           const original = object.userData.originalMaterial;
           if (original) {
               // Safety check: Ensure original is a valid Material instance
-              if (original.isMaterial || (Array.isArray(original) && original[0].isMaterial)) {
+              const isArray = Array.isArray(original);
+              const isValid = isArray ? original.every(m => m && m.isMaterial) : (original && original.isMaterial);
+
+              if (isValid) {
                   object.material = original;
               } else {
-                  console.warn('Restoring invalid material from userData (corruption), resetting to default.', original);
+                  console.warn('Restoring invalid material from userData (corruption), resetting to default.', original, 'Object:', object.name);
                   object.material = new THREE.MeshStandardMaterial({color: 0xcccccc});
               }
               delete object.userData.originalMaterial;
           }
       } else {
           // Override
+          // Save current material if not already saved
           if (!object.userData.originalMaterial) {
-              object.userData.originalMaterial = object.material;
+              // Ensure we are saving a valid material
+              const current = object.material;
+              const isArray = Array.isArray(current);
+              const isValid = isArray ? current.every(m => m && m.isMaterial) : (current && current.isMaterial);
+
+              if (isValid) {
+                  object.userData.originalMaterial = object.material;
+              } else {
+                  console.warn('Attempted to save invalid material as originalMaterial. Resetting.', current);
+                  object.material = new THREE.MeshStandardMaterial({color: 0xcccccc});
+                  object.userData.originalMaterial = object.material;
+              }
           }
           object.material = this.overrideMaterials[mode];
       }

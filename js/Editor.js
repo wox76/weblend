@@ -202,7 +202,7 @@ export default class Editor {
 
     // Populate materials library
     this.materials = [];
-    scene.traverse(obj => {
+    this.sceneManager.mainScene.traverse(obj => {
         if (obj.material) {
             const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
             mats.forEach(m => {

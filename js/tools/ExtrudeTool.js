@@ -73,6 +73,7 @@ export class ExtrudeTool {
 
   setupTransformListeners() {
     this.transformControls.addEventListener('mouseDown', () => {
+      console.log('ExtrudeTool: mouseDown');
       const handle = this.transformControls.object;
       if (!handle) return;
       this.objectPositionOnDown = handle.getWorldPosition(this._worldPosHelper).clone();
@@ -84,6 +85,7 @@ export class ExtrudeTool {
       if (!handle || !this.objectPositionOnDown) return;
 
       if (!this.extrudeStarted) {
+        console.log('ExtrudeTool: Starting extrude');
         this.startExtrude();
         this.extrudeStarted = true;
       }
@@ -92,6 +94,7 @@ export class ExtrudeTool {
     });
 
     this.transformControls.addEventListener('mouseUp', () => {
+      console.log('ExtrudeTool: mouseUp');
       this.objectPositionOnDown = null;
       this.extrudeStarted = false;
 
@@ -100,8 +103,9 @@ export class ExtrudeTool {
       const vertexEditor = new VertexEditor(this.editor, editedObject);
       vertexEditor.updateGeometryAndHelpers();
       const meshData = editedObject.userData.meshData;
-      this.afterMeshData = structuredClone(meshData);
+      this.afterMeshData = MeshData.serializeMeshData(meshData);
 
+      console.log('ExtrudeTool: Executing command', { newVertexIds: this.newVertexIds });
       this.editor.execute(new ExtrudeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
 
       // Keep selection on the new vertices
@@ -116,6 +120,7 @@ export class ExtrudeTool {
   }
 
   enableFor(object) {
+    console.log('ExtrudeTool: enableFor', object);
     if (!object) return;
     this.transformControls.attach(object);
     this.transformControls.visible = true;
@@ -217,7 +222,7 @@ export class ExtrudeTool {
     const vertexEditor = new VertexEditor(this.editor, editedObject);
     vertexEditor.updateGeometryAndHelpers(); // Ensure all changes are applied
     const meshData = editedObject.userData.meshData;
-    this.afterMeshData = structuredClone(meshData);
+    this.afterMeshData = MeshData.serializeMeshData(meshData);
 
     this.editor.execute(new ExtrudeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
 
@@ -259,7 +264,7 @@ export class ExtrudeTool {
     const editedObject = this.editSelection.editedObject;
     const vertexEditor = new VertexEditor(this.editor, editedObject);
     const meshData = editedObject.userData.meshData;
-    this.beforeMeshData = structuredClone(meshData);
+    this.beforeMeshData = MeshData.serializeMeshData(meshData);
 
     const mode = this.editSelection.subSelectionMode;
     const selectedVertexIds = Array.from(this.editSelection.selectedVertexIds);

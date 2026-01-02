@@ -140,8 +140,11 @@ export class VertexEditor {
   applyMeshData(newMeshData) {
     if (!this.object) return false;
 
-    const cloned = structuredClone(newMeshData);
-    this.object.userData.meshData = cloned;
+    // structuredClone strips methods from MeshData class instance. 
+    // Use serialization to ensure we get a clean POJO that rehydrateMeshData can properly restore.
+    const serialized = MeshData.serializeMeshData(newMeshData);
+    // We can assign the serialized object directly; rehydrate will handle conversion to Maps/Instances.
+    this.object.userData.meshData = serialized;
 
     MeshData.rehydrateMeshData(this.object);
   }

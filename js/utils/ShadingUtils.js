@@ -17,7 +17,10 @@ export class ShadingUtils {
     } else if (mode === 'auto') {
       geometry = meshData.toAngleBasedGeometry(undefined, useEarcut);
     }
-    geometry.computeVertexNormals();
+    
+    if (geometry) {
+        geometry.computeVertexNormals();
+    }
     return geometry;
   }
 

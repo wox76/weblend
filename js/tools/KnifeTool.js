@@ -107,11 +107,11 @@ export class KnifeTool {
       return;
     }
     this.updatePreview(aCut.position, bCut.position);
-    this.beforeMeshData = structuredClone(meshData);
+    this.beforeMeshData = MeshData.serializeMeshData(meshData);
     
     this.applyCut();
 
-    this.afterMeshData = structuredClone(meshData);
+    this.afterMeshData = MeshData.serializeMeshData(meshData);
     this.editor.execute(new KnifeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
 
     const mode = this.editSelection.subSelectionMode;

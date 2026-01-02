@@ -29,7 +29,7 @@ export class SubdivisionSurfaceModifier {
      const newMesh = new MeshData();
      const uniqueVertices = []; // { pos: {x,y,z}, newV: Vertex }
      const oldIdToNewV = new Map();
-     const epsilon = 1e-5;
+     const epsilon = 1e-9;
 
      for (const v of mesh.vertices.values()) {
          let match = null;
