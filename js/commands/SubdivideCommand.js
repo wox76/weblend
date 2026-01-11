@@ -17,8 +17,8 @@ export class SubdivideCommand {
             // Clone mesh data for undo (Deep Copy)
             this.oldMeshData = MeshData.serializeMeshData(object.userData.meshData);
             
-            // Capture selection IDs
-            this.selectedFaceIds = Array.from(editor.editSelection.selectedFaceIds); 
+            // Capture selection IDs (explicit or implicit)
+            this.selectedFaceIds = Array.from(editor.editSelection.getFacesFromSelection());
         }
     }
 

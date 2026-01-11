@@ -1103,6 +1103,53 @@ export default class EditSelection {
     return Array.from(result);
   }
 
+  getFacesFromSelection() {
+    if (!this.editedObject || !this.editedObject.userData.meshData) return new Set();
+    const meshData = this.editedObject.userData.meshData;
+    const faceIds = new Set();
+
+    if (this.subSelectionMode === 'vertex') {
+      const selectedV = this.selectedVertexIds;
+      if (selectedV.size === 0) return faceIds;
+      
+      // Find faces where ALL vertices are selected
+      for (const face of meshData.faces.values()) {
+        let allSelected = true;
+        for (const vid of face.vertexIds) {
+          if (!selectedV.has(vid)) {
+            allSelected = false;
+            break;
+          }
+        }
+        if (allSelected) {
+          faceIds.add(face.id);
+        }
+      }
+    } else if (this.subSelectionMode === 'edge') {
+      const selectedE = this.selectedEdgeIds;
+      if (selectedE.size === 0) return faceIds;
+
+      // Find faces where ALL edges are selected
+      for (const face of meshData.faces.values()) {
+        let allSelected = true;
+        for (const eid of face.edgeIds) {
+          if (!selectedE.has(eid)) {
+            allSelected = false;
+            break;
+          }
+        }
+        if (allSelected) {
+          faceIds.add(face.id);
+        }
+      }
+    } else {
+      // Face mode
+      return new Set(this.selectedFaceIds);
+    }
+
+    return faceIds;
+  }
+
   selectAll() {
     if (!this.editedObject || !this.editedObject.userData.meshData) return;
     const meshData = this.editedObject.userData.meshData;
