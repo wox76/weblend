@@ -708,10 +708,19 @@ export default class EditSelection {
     }
   }
 
+  clear() {
+    this.selectedVertexIds.clear();
+    this.selectedEdgeIds.clear();
+    this.selectedFaceIds.clear();
+    this.vertexHandle.visible = false;
+    this.dragging = false;
+    this.mouseDownPos = null;
+
+    this.signals.editSelectionCleared.dispatch();
+  }
+
   clearSelection() {
     // Only clear the current mode's selection to avoid side effects in other modes (and simpler undo)
-    // If we want to truly clear all, we'd need multiple commands or a MultiCommand.
-    // For now, assuming user intention is to clear what they see.
     let count = 0;
     if (this.subSelectionMode === 'vertex') count = this.selectedVertexIds.size;
     else if (this.subSelectionMode === 'edge') count = this.selectedEdgeIds.size;
@@ -719,13 +728,10 @@ export default class EditSelection {
     
     if (count > 0) {
         this.editor.execute(new SelectSubObjectCommand(this.editor, this.subSelectionMode, []));
+    } else {
+        // Fallback for safety or if mixed modes (though we focus on current mode)
+        this.clear();
     }
-    
-    // UI cleanup
-    this.vertexHandle.visible = false;
-    this.dragging = false;
-    this.mouseDownPos = null;
-    this.signals.editSelectionCleared.dispatch();
   }
 
   updateVertexHandle() {

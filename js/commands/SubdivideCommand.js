@@ -47,12 +47,13 @@ export class SubdivideCommand {
         this.object.geometry = workingMeshData.toSharedVertexGeometry();
         
         // Update Selection to new faces
-        this.editor.editSelection.clearSelection();
+        this.editor.editSelection.clear();
         currentSelection.forEach(id => this.editor.editSelection.selectedFaceIds.add(id));
         
         this.editor.signals.objectChanged.dispatch(this.object);
         this.editor.signals.sceneGraphChanged.dispatch();
         this.editor.editHelpers.refreshHelpers();
+        this.editor.signals.editSelectionChanged.dispatch('face');
     }
 
     undo() {
@@ -66,12 +67,13 @@ export class SubdivideCommand {
         this.object.geometry = restored.toSharedVertexGeometry();
         
         // Restore Old Selection
-        this.editor.editSelection.clearSelection();
+        this.editor.editSelection.clear();
         this.selectedFaceIds.forEach(id => this.editor.editSelection.selectedFaceIds.add(id));
         
         this.editor.signals.objectChanged.dispatch(this.object);
         this.editor.signals.sceneGraphChanged.dispatch();
         this.editor.editHelpers.refreshHelpers();
+        this.editor.signals.editSelectionChanged.dispatch('face');
     }
 
     toJSON() {
