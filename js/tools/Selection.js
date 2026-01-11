@@ -83,7 +83,14 @@ export default class Selection {
 
     this.selectionBox.finishSelection();
 
-    if (this.dragging) {  
+    // Store state before cleaning up
+    const wasDragging = this.dragging;
+    
+    // Always cleanup state first
+    this.dragging = false;
+    this.mouseDownPos = null;
+
+    if (wasDragging) {  
       const objects = this.getBoxSelectedObjects();
       if (objects === null || objects.length === 0) {
         this.deselect();
@@ -100,9 +107,6 @@ export default class Selection {
 
       this.select(object);
     }
-
-    this.dragging = false;
-    this.mouseDownPos = null;
   }
 
   getSingleSelectedObject(event) {

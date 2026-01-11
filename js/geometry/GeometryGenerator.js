@@ -100,7 +100,7 @@ export function generateDuplicatedVertexGeometry(meshData, useEarcut = true) {
   return geometry;
 }
 
-function removeCollinearVerticesComplex(items, epsilon = 1e-6) {
+function removeCollinearVerticesComplex(items, epsilon = 1e-12) {
   if (items.length <= 3) return items.slice();
 
   const toVec3 = item => new THREE.Vector3(item.v.position.x, item.v.position.y, item.v.position.z);
@@ -412,7 +412,7 @@ export function projectTo2D(verts, normal) {
   return flat;
 }
 
-export function removeCollinearVertices(verts, epsilon = 1e-6) {
+export function removeCollinearVertices(verts, epsilon = 1e-12) {
   if (verts.length <= 3) return verts.slice();
 
   const toVec3 = v => new THREE.Vector3(v.position.x, v.position.y, v.position.z);

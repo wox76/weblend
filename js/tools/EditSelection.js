@@ -175,7 +175,14 @@ export default class EditSelection {
     
     this.selectionBox.finishSelection();
 
-    if (this.dragging) {
+    // Store state
+    const wasDragging = this.dragging;
+    
+    // Reset state
+    this.dragging = false;
+    this.mouseDownPos = null;
+
+    if (wasDragging) {
       this.applyBoxSelection();
     } else {
       if (event.altKey) {
@@ -184,9 +191,6 @@ export default class EditSelection {
         this.applyClickSelection(event);
       }
     }
-
-    this.dragging = false;
-    this.mouseDownPos = null;
   }
 
   handleLoopSelection(event) {
