@@ -38,6 +38,7 @@ You will find familiar concepts everywhere:
 There is still a lot to do to catch up with the giant that is **Blender**, but development is proceeding **extremely fast**. Thanks to the synergy between my coding skills and **Gemini**, features are being added and refined rapidly.
 
 ### ✨ Latest Updates
+- **Selection History:** Added Undo/Redo support for selection in both Object and Edit modes. Pressing `CTRL + Z` now restores previous selection states if you accidentally deselect or click away.
 - **Subdivision Stability:** Fixed geometry artifacts and "face splitting" during extrusion with the Subdivision Surface modifier by implementing a topological winding check and optimized vertex merging.
 - **Dynamic Shading Fix:** Corrected the "Shade Smooth/Flat" commands to properly respect the active Modifier Stack, ensuring the mesh remains subdivided when changing shading modes.
 - **Extrude Refinement:** Improved the Extrude tool to automatically inherit material indices and UV properties, ensuring visual consistency on newly created side faces.
