@@ -50,10 +50,19 @@ export class SubdivideCommand {
         this.editor.editSelection.clear();
         currentSelection.forEach(id => this.editor.editSelection.selectedFaceIds.add(id));
         
+        // Sync Vertices and Edges from selected Faces
+        for (const fid of currentSelection) {
+            const face = workingMeshData.faces.get(fid);
+            if (face) {
+                face.vertexIds.forEach(vid => this.editor.editSelection.selectedVertexIds.add(vid));
+                face.edgeIds.forEach(eid => this.editor.editSelection.selectedEdgeIds.add(eid));
+            }
+        }
+        
         this.editor.signals.objectChanged.dispatch(this.object);
         this.editor.signals.sceneGraphChanged.dispatch();
         this.editor.editHelpers.refreshHelpers();
-        this.editor.signals.editSelectionChanged.dispatch('face');
+        this.editor.signals.editSelectionChanged.dispatch(this.editor.editSelection.subSelectionMode);
     }
 
     undo() {
@@ -70,10 +79,19 @@ export class SubdivideCommand {
         this.editor.editSelection.clear();
         this.selectedFaceIds.forEach(id => this.editor.editSelection.selectedFaceIds.add(id));
         
+        // Sync Vertices and Edges from restored Faces
+        for (const fid of this.selectedFaceIds) {
+            const face = restored.faces.get(fid);
+            if (face) {
+                face.vertexIds.forEach(vid => this.editor.editSelection.selectedVertexIds.add(vid));
+                face.edgeIds.forEach(eid => this.editor.editSelection.selectedEdgeIds.add(eid));
+            }
+        }
+        
         this.editor.signals.objectChanged.dispatch(this.object);
         this.editor.signals.sceneGraphChanged.dispatch();
         this.editor.editHelpers.refreshHelpers();
-        this.editor.signals.editSelectionChanged.dispatch('face');
+        this.editor.signals.editSelectionChanged.dispatch(this.editor.editSelection.subSelectionMode);
     }
 
     toJSON() {
