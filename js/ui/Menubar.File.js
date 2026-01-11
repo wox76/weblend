@@ -87,7 +87,7 @@ export class MenubarFile {
   openProject(editor) {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.json';
+    input.accept = '.blend, .json';
 
     input.addEventListener('change', async () => {
       const file = input.files[0];
@@ -95,13 +95,27 @@ export class MenubarFile {
 
       try {
         const text = await file.text();
-        const json = JSON.parse(text);
+        let json;
+        
+        try {
+            json = JSON.parse(text);
+        } catch (jsonError) {
+             // If parsing fails, it might be a binary .blend file (which we don't support yet)
+             // or corrupted text.
+             console.error("JSON Parse Error", jsonError);
+             alert("Failed to open file. If this is a native Blender binary file, it is not currently supported. Only Weblend-created .blend (JSON) files are supported.");
+             return;
+        }
 
-        this.sceneManager.emptyAllScenes();
-        editor.fromJSON(json);
-        requestAnimationFrame(() => editor.panelResizer.onWindowResize());
+        if (json.metadata && json.metadata.type === 'Project') {
+            this.sceneManager.emptyAllScenes();
+            editor.fromJSON(json);
+            requestAnimationFrame(() => editor.panelResizer.onWindowResize());
+            console.log(`Project loaded: ${file.name}`);
+        } else {
+            alert('Invalid project file format.');
+        }
 
-        console.log(`Project loaded: ${file.name}`);
       } catch (e) {
         console.error('Failed to open project:', e);
         alert('Failed to open project.');
@@ -111,7 +125,7 @@ export class MenubarFile {
     input.click();
   }
 
-  saveProject(editor, filename = 'project.json') {
+  saveProject(editor, filename = 'project.blend') {
     try {
       const json = editor.toJSON();
       const blob = new Blob([JSON.stringify(json)], { type: 'application/json' });
