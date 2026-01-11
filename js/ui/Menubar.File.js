@@ -87,34 +87,54 @@ export class MenubarFile {
   openProject(editor) {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.blend, .json';
+    input.accept = '.glb, .gltf, .json';
 
     input.addEventListener('change', async () => {
       const file = input.files[0];
       if (!file) return;
 
-      try {
-        const text = await file.text();
-        let json;
-        
-        try {
-            json = JSON.parse(text);
-        } catch (jsonError) {
-             // If parsing fails, it might be a binary .blend file (which we don't support yet)
-             // or corrupted text.
-             console.error("JSON Parse Error", jsonError);
-             alert("Failed to open file. If this is a native Blender binary file, it is not currently supported. Only Weblend-created .blend (JSON) files are supported.");
-             return;
-        }
+      const filename = file.name.toLowerCase();
 
-        if (json.metadata && json.metadata.type === 'Project') {
+      if (filename.endsWith('.json')) {
+          // Legacy JSON support
+          try {
+            const text = await file.text();
+            const json = JSON.parse(text);
             this.sceneManager.emptyAllScenes();
             editor.fromJSON(json);
-            requestAnimationFrame(() => editor.panelResizer.onWindowResize());
-            console.log(`Project loaded: ${file.name}`);
-        } else {
-            alert('Invalid project file format.');
-        }
+            return;
+          } catch(e) { console.error(e); }
+      }
+
+      // GLB/GLTF loading
+      try {
+        const { GLTFLoader } = await import('jsm/loaders/GLTFLoader.js');
+        const loader = new GLTFLoader();
+        const arrayBuffer = await file.arrayBuffer();
+        
+        loader.parse(arrayBuffer, '', (gltf) => {
+            const projectData = gltf.scene.userData.weblendProject || (gltf.userData && gltf.userData.weblendProject);
+
+            if (projectData) {
+                // It's a Weblend Project File
+                console.log("Restoring Weblend Project from GLB...");
+                this.sceneManager.emptyAllScenes();
+                editor.fromJSON(projectData);
+                requestAnimationFrame(() => editor.panelResizer.onWindowResize());
+            } else {
+                // It's a standard GLB model (e.g. from Blender)
+                console.log("Importing standard GLB model...");
+                // Just add the scene objects
+                while(gltf.scene.children.length > 0) {
+                    const obj = gltf.scene.children[0];
+                    this.sceneManager.addObject(obj);
+                }
+            }
+            console.log(`File loaded: ${file.name}`);
+        }, (err) => {
+            console.error(err);
+            alert("Failed to load GLB file.");
+        });
 
       } catch (e) {
         console.error('Failed to open project:', e);
@@ -125,18 +145,45 @@ export class MenubarFile {
     input.click();
   }
 
-  saveProject(editor, filename = 'project.blend') {
+  async saveProject(editor, filename = 'project.glb') {
     try {
-      const json = editor.toJSON();
-      const blob = new Blob([JSON.stringify(json)], { type: 'application/json' });
+      const { GLTFExporter } = await import('jsm/exporters/GLTFExporter.js');
+      const exporter = new GLTFExporter();
 
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(link.href);
+      // 1. Serialize full Weblend state
+      const projectJson = editor.toJSON();
 
-      console.log(`Project saved as ${filename}`);
+      // 2. Prepare scene for export (Clone to avoid modifying live scene)
+      // We explicitly export the main scene. 
+      // Note: We create a container to attach userdata if needed, or attach to scene.
+      const sceneToExport = this.sceneManager.mainScene.clone();
+      
+      // 3. Inject Weblend Data into userData
+      sceneToExport.userData.weblendProject = projectJson;
+
+      // 4. Export to GLB
+      exporter.parse(
+        sceneToExport,
+        (result) => {
+            const blob = new Blob([result], { type: 'model/gltf-binary' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            console.log(`Project saved as ${filename}`);
+        },
+        (err) => {
+            console.error('An error occurred during GLB export:', err);
+            alert('Failed to create GLB file.');
+        },
+        { 
+            binary: true,
+            onlyVisible: false, // Export everything
+            truncateDrawRange: false
+        }
+      );
+
     } catch (e) {
       console.error('Failed to save project:', e);
       alert('Failed to save project.');
