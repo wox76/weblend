@@ -51,7 +51,7 @@ export function generateDuplicatedVertexGeometry(meshData, useEarcut = true) {
       currentIndex++;
     }
 
-    if (useEarcut) {
+    if (useEarcut && verts.length > 4) {
       const rawVerts = verts.map(item => item.v);
       const normal = computePlaneNormal(rawVerts);
       const flatVertices = projectTo2D(rawVerts, normal);
@@ -174,7 +174,7 @@ export function generateSharedVertexGeometry(meshData, useEarcut = true) {
       faceIndices.push(currentBufferIndex);
     }
 
-    if (useEarcut) {
+    if (useEarcut && faceIndices.length > 4) {
       const rawVerts = faceVerticesData.map(item => item.v); // Original vertices for normal/2D projection
       const normal = computePlaneNormal(rawVerts);
       const flatVertices = projectTo2D(rawVerts, normal);
@@ -330,7 +330,7 @@ export function generateAngleBasedGeometry(meshData, angleDegree = 60, useEarcut
     }
 
     // --- 4.5 Triangulate (Earcut or Fan) ---
-    if (useEarcut) {
+    if (useEarcut && faceIndices.length > 4) {
       const normal = computePlaneNormal(verts);
       const flatVertices2D = projectTo2D(verts, normal);
       const triangulated = earcut(flatVertices2D);
