@@ -799,7 +799,7 @@ export default class EditSelection {
         posAttr.getZ(hit.index)
       ).applyMatrix4(vertexPoints.matrixWorld);
 
-      if (this.sceneManager.mainScene.overrideMaterial?.wireframe) {
+      if (this.sceneManager.currentShadingMode === 'wireframe') {
         visibleVertices.push({ ...hit, point: vertexPos });
         continue;
       }
@@ -846,7 +846,7 @@ export default class EditSelection {
       const vB = new THREE.Vector3(pos.getX(1), pos.getY(1), pos.getZ(1))
         .applyMatrix4(thinLine.matrixWorld);
 
-      if (this.sceneManager.mainScene.overrideMaterial?.wireframe) {
+      if (this.sceneManager.currentShadingMode === 'wireframe') {
         visibleEdges.push({
           thinLine,
           visualLine: thinLine.userData.visualLine,
@@ -900,7 +900,7 @@ export default class EditSelection {
     const occluders = mainObjects.filter(obj => obj !== faceMesh);
 
     for (const hit of faceHits) {
-      if (this.sceneManager.mainScene.overrideMaterial?.wireframe) {
+      if (this.sceneManager.currentShadingMode === 'wireframe') {
         visibleFaces.push(hit);
         continue;
       }
