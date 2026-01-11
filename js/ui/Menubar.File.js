@@ -87,7 +87,7 @@ export class MenubarFile {
   openProject(editor) {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.blend, .json';
+    input.accept = '.weblend, .json';
 
     input.addEventListener('change', async () => {
       const file = input.files[0];
@@ -101,7 +101,7 @@ export class MenubarFile {
             json = JSON.parse(text);
         } catch (jsonError) {
              console.error("JSON Parse Error", jsonError);
-             alert("Failed to open file. This appears to be a native binary Blender file, which is not supported in the browser. Only Weblend-created .blend (JSON) files are supported.");
+             alert("Failed to open file. Please ensure this is a valid .weblend project file.");
              return;
         }
 
@@ -123,7 +123,7 @@ export class MenubarFile {
     input.click();
   }
 
-  saveProject(editor, filename = 'project.blend') {
+  saveProject(editor, filename = 'project.weblend') {
     try {
       const json = editor.toJSON();
       const blob = new Blob([JSON.stringify(json)], { type: 'application/json' });
