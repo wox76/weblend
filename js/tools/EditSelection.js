@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SelectSubObjectCommand } from '../commands/SelectSubObjectCommand.js';
 
 export default class EditSelection {
   constructor(editor) {
@@ -592,55 +593,16 @@ export default class EditSelection {
     return faceIndices;
   }
 
-  selectVertices(vertexIds, isBoxSelection = false) {
-    const isArray = Array.isArray(vertexIds);
-    if (!isArray) vertexIds = [vertexIds];
-
-    if (this.multiSelectEnabled) {
-      if (isBoxSelection) {
-        // Box selection: add only
-        vertexIds.forEach(id => this.selectedVertexIds.add(id));
-      } else {
-        // Click selection: toggle
-        vertexIds.forEach(id => {
-          if (this.selectedVertexIds.has(id)) {
-            this.selectedVertexIds.delete(id);
-          } else {
-            this.selectedVertexIds.add(id);
-          }
-        });
-      }
-    } else {
-      this.selectedVertexIds.clear();
-      vertexIds.forEach(id => this.selectedVertexIds.add(id));
-    }
-
+  setVertexSelection(ids) {
+    this.selectedVertexIds.clear();
+    ids.forEach(id => this.selectedVertexIds.add(id));
     this.updateVertexHandle();
     this.signals.editSelectionChanged.dispatch('vertex');
   }
 
-  selectEdges(edgeIds, isBoxSelection = false) {
-    const isArray = Array.isArray(edgeIds);
-    if (!isArray) edgeIds = [edgeIds];
-
-    if (this.multiSelectEnabled) {
-      if (isBoxSelection) {
-        // Box selection: add only
-        edgeIds.forEach(id => this.selectedEdgeIds.add(id));
-      } else {
-        // Click selection: toggle
-        edgeIds.forEach(id => {
-          if (this.selectedEdgeIds.has(id)) {
-            this.selectedEdgeIds.delete(id);
-          } else {
-            this.selectedEdgeIds.add(id);
-          }
-        });
-      }
-    } else {
-      this.selectedEdgeIds.clear();
-      edgeIds.forEach(id => this.selectedEdgeIds.add(id));
-    }
+  setEdgeSelection(ids) {
+    this.selectedEdgeIds.clear();
+    ids.forEach(id => this.selectedEdgeIds.add(id));
 
     const vIds = this.getSelectedEdgeVertexIds();
     this.selectedVertexIds.clear();
@@ -650,28 +612,9 @@ export default class EditSelection {
     this.signals.editSelectionChanged.dispatch('edge');
   }
 
-  selectFaces(faceIds, isBoxSelection = false) {
-    const isArray = Array.isArray(faceIds);
-    if (!isArray) faceIds = [faceIds];
-
-    if (this.multiSelectEnabled) {
-      if (isBoxSelection) {
-        // Box selection: add only
-        faceIds.forEach(id => this.selectedFaceIds.add(id));
-      } else {
-        // Click selection: toggle
-        faceIds.forEach(id => {
-          if (this.selectedFaceIds.has(id)) {
-            this.selectedFaceIds.delete(id);
-          } else {
-            this.selectedFaceIds.add(id);
-          }
-        });
-      }
-    } else {
-      this.selectedFaceIds.clear();
-      faceIds.forEach(id => this.selectedFaceIds.add(id));
-    }
+  setFaceSelection(ids) {
+    this.selectedFaceIds.clear();
+    ids.forEach(id => this.selectedFaceIds.add(id));
 
     const vIds = this.getSelectedFaceVertexIds();
     this.selectedVertexIds.clear();
@@ -681,14 +624,107 @@ export default class EditSelection {
     this.signals.editSelectionChanged.dispatch('face');
   }
 
+  selectVertices(vertexIds, isBoxSelection = false) {
+    const isArray = Array.isArray(vertexIds);
+    if (!isArray) vertexIds = [vertexIds];
+
+    let newIds = new Set();
+    
+    if (this.multiSelectEnabled) {
+      newIds = new Set(this.selectedVertexIds);
+      if (isBoxSelection) {
+        vertexIds.forEach(id => newIds.add(id));
+      } else {
+        vertexIds.forEach(id => {
+          if (newIds.has(id)) newIds.delete(id);
+          else newIds.add(id);
+        });
+      }
+    } else {
+      newIds = new Set(vertexIds);
+    }
+
+    const currentArr = Array.from(this.selectedVertexIds).sort().join(',');
+    const newArr = Array.from(newIds).sort().join(',');
+
+    if (currentArr !== newArr) {
+        this.editor.execute(new SelectSubObjectCommand(this.editor, 'vertex', Array.from(newIds)));
+    }
+  }
+
+  selectEdges(edgeIds, isBoxSelection = false) {
+    const isArray = Array.isArray(edgeIds);
+    if (!isArray) edgeIds = [edgeIds];
+
+    let newIds = new Set();
+
+    if (this.multiSelectEnabled) {
+      newIds = new Set(this.selectedEdgeIds);
+      if (isBoxSelection) {
+        edgeIds.forEach(id => newIds.add(id));
+      } else {
+        edgeIds.forEach(id => {
+          if (newIds.has(id)) newIds.delete(id);
+          else newIds.add(id);
+        });
+      }
+    } else {
+      newIds = new Set(edgeIds);
+    }
+
+    const currentArr = Array.from(this.selectedEdgeIds).sort().join(',');
+    const newArr = Array.from(newIds).sort().join(',');
+
+    if (currentArr !== newArr) {
+        this.editor.execute(new SelectSubObjectCommand(this.editor, 'edge', Array.from(newIds)));
+    }
+  }
+
+  selectFaces(faceIds, isBoxSelection = false) {
+    const isArray = Array.isArray(faceIds);
+    if (!isArray) faceIds = [faceIds];
+
+    let newIds = new Set();
+
+    if (this.multiSelectEnabled) {
+      newIds = new Set(this.selectedFaceIds);
+      if (isBoxSelection) {
+        faceIds.forEach(id => newIds.add(id));
+      } else {
+        faceIds.forEach(id => {
+          if (newIds.has(id)) newIds.delete(id);
+          else newIds.add(id);
+        });
+      }
+    } else {
+      newIds = new Set(faceIds);
+    }
+
+    const currentArr = Array.from(this.selectedFaceIds).sort().join(',');
+    const newArr = Array.from(newIds).sort().join(',');
+
+    if (currentArr !== newArr) {
+        this.editor.execute(new SelectSubObjectCommand(this.editor, 'face', Array.from(newIds)));
+    }
+  }
+
   clearSelection() {
-    this.selectedVertexIds.clear();
-    this.selectedEdgeIds.clear();
-    this.selectedFaceIds.clear();
+    // Only clear the current mode's selection to avoid side effects in other modes (and simpler undo)
+    // If we want to truly clear all, we'd need multiple commands or a MultiCommand.
+    // For now, assuming user intention is to clear what they see.
+    let count = 0;
+    if (this.subSelectionMode === 'vertex') count = this.selectedVertexIds.size;
+    else if (this.subSelectionMode === 'edge') count = this.selectedEdgeIds.size;
+    else if (this.subSelectionMode === 'face') count = this.selectedFaceIds.size;
+    
+    if (count > 0) {
+        this.editor.execute(new SelectSubObjectCommand(this.editor, this.subSelectionMode, []));
+    }
+    
+    // UI cleanup
     this.vertexHandle.visible = false;
     this.dragging = false;
     this.mouseDownPos = null;
-
     this.signals.editSelectionCleared.dispatch();
   }
 
@@ -1067,13 +1103,13 @@ export default class EditSelection {
 
     if (this.subSelectionMode === 'vertex') {
       const allIds = Array.from(meshData.vertices.keys());
-      this.selectVertices(allIds);
+      this.editor.execute(new SelectSubObjectCommand(this.editor, 'vertex', allIds));
     } else if (this.subSelectionMode === 'edge') {
       const allIds = Array.from(meshData.edges.keys());
-      this.selectEdges(allIds);
+      this.editor.execute(new SelectSubObjectCommand(this.editor, 'edge', allIds));
     } else if (this.subSelectionMode === 'face') {
       const allIds = Array.from(meshData.faces.keys());
-      this.selectFaces(allIds);
+      this.editor.execute(new SelectSubObjectCommand(this.editor, 'face', allIds));
     }
   }
 
@@ -1084,15 +1120,15 @@ export default class EditSelection {
     if (this.subSelectionMode === 'vertex') {
       const allIds = Array.from(meshData.vertices.keys());
       const newIds = allIds.filter(id => !this.selectedVertexIds.has(id));
-      this.selectVertices(newIds);
+      this.editor.execute(new SelectSubObjectCommand(this.editor, 'vertex', newIds));
     } else if (this.subSelectionMode === 'edge') {
       const allIds = Array.from(meshData.edges.keys());
       const newIds = allIds.filter(id => !this.selectedEdgeIds.has(id));
-      this.selectEdges(newIds);
+      this.editor.execute(new SelectSubObjectCommand(this.editor, 'edge', newIds));
     } else if (this.subSelectionMode === 'face') {
       const allIds = Array.from(meshData.faces.keys());
       const newIds = allIds.filter(id => !this.selectedFaceIds.has(id));
-      this.selectFaces(newIds);
+      this.editor.execute(new SelectSubObjectCommand(this.editor, 'face', newIds));
     }
   }
 }

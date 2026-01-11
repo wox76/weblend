@@ -26,6 +26,8 @@ import { RemoveModifierCommand } from './RemoveModifierCommand.js';
 import { UpdateModifierCommand } from './UpdateModifierCommand.js';
 import { MoveModifierCommand } from './MoveModifierCommand.js';
 import { SetMaterialFaceCommand } from './SetMaterialFaceCommand.js';
+import { SelectObjectCommand } from './SelectObjectCommand.js';
+import { SelectSubObjectCommand } from './SelectSubObjectCommand.js';
 
 export const commands = new Map([
   [SetPositionCommand.type, SetPositionCommand],
@@ -56,4 +58,6 @@ export const commands = new Map([
   [UpdateModifierCommand.type, UpdateModifierCommand],
   [MoveModifierCommand.type, MoveModifierCommand],
   [SetMaterialFaceCommand.type, SetMaterialFaceCommand],
+  [SelectObjectCommand.type, SelectObjectCommand],
+  [SelectSubObjectCommand.type, SelectSubObjectCommand],
 ]);

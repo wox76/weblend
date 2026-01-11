@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SelectObjectCommand } from '../commands/SelectObjectCommand.js';
 
 export default class Selection {
   constructor(editor) {
@@ -196,14 +197,26 @@ export default class Selection {
     return this.selectedObjects;
   }
 
-  deselect() {
+  setSelectionByUuids(uuids) {
     this.clearHighlight();
     this.selectedObjects = [];
-    this.updatePivotHandle();
-    this.dragging = false;
-    this.mouseDownPos = null;
     
-    this.signals.objectSelected.dispatch([]);
+    for (const uuid of uuids) {
+        const obj = this.editor.objectByUuid(uuid);
+        if (obj) {
+            this.selectedObjects.push(obj);
+            this.highlightObject(obj);
+        }
+    }
+    
+    this.updatePivotHandle();
+    this.signals.objectSelected.dispatch(this.selectedObjects);
+  }
+
+  deselect() {
+    if (this.selectedObjects.length > 0) {
+        this.editor.execute(new SelectObjectCommand(this.editor, []));
+    }
   }
 
   clearHighlight() {
@@ -227,54 +240,40 @@ export default class Selection {
   select(objects, isBoxSelection = false) {
     const isArray = Array.isArray(objects);
     if (!isArray) objects = [objects];
-
     objects = objects.filter(o => o);
 
+    let newSelection = [];
+
     if (this.multiSelectEnabled) {
-
-      if (isBoxSelection) {
-        // Box selection: add only
-        for (const obj of objects) {
-          if (!this.selectedObjects.includes(obj)) {
-            this.selectedObjects.push(obj);
-            this.highlightObject(obj);
-          }
+        newSelection = [...this.selectedObjects];
+        
+        if (isBoxSelection) {
+            for (const obj of objects) {
+                if (!newSelection.includes(obj)) {
+                    newSelection.push(obj);
+                }
+            }
+        } else {
+            for (const obj of objects) {
+                const i = newSelection.indexOf(obj);
+                if (i !== -1) {
+                    newSelection.splice(i, 1);
+                } else {
+                    newSelection.push(obj);
+                }
+            }
         }
-      } else {
-        // Click selection: toggle
-        for (const obj of objects) {
-          const i = this.selectedObjects.indexOf(obj);
-
-          if (i !== -1) {
-            this.selectedObjects.splice(i, 1);
-            this.unhighlightObject(obj);
-          } else {
-            this.selectedObjects.push(obj);
-            this.highlightObject(obj);
-          }
-        }
-      }
-
-      // If everything got toggled off
-      if (this.selectedObjects.length === 0) {
-        this.deselect();
-        return;
-      }
-
-      this.updatePivotHandle();
-      this.signals.objectSelected.dispatch(this.selectedObjects);
-      return;
+    } else {
+        newSelection = [...objects];
     }
-
-    // Click selection (no shift)
-    this.clearHighlight();
-    this.selectedObjects = [...objects];
-    for (const obj of this.selectedObjects) {
-      this.highlightObject(obj);
+    
+    // Check if selection actually changed
+    const currentUuids = this.selectedObjects.map(o => o.uuid).sort().join(',');
+    const newUuids = newSelection.map(o => o.uuid).sort().join(',');
+    
+    if (currentUuids !== newUuids) {
+        this.editor.execute(new SelectObjectCommand(this.editor, newSelection));
     }
-
-    this.updatePivotHandle();
-    this.signals.objectSelected.dispatch(this.selectedObjects);
   }
 
   highlightObject(object) {
@@ -354,7 +353,6 @@ export default class Selection {
       }
     }
 
-    this.deselect();
-    this.select(newSelection);
+    this.editor.execute(new SelectObjectCommand(this.editor, newSelection));
   }
 }
