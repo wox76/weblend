@@ -318,6 +318,20 @@ export class ExtrudeTool {
     const selectedEdgeIds = Array.from(this.editSelection.selectedEdgeIds);
     const selectedFaceIds = Array.from(this.editSelection.selectedFaceIds);
 
+    // Identify edges fully contained in the vertex selection to extrude them as well (creating side faces)
+    const derivedEdgeIds = [];
+    if (mode === 'vertex') {
+        const vSet = new Set(selectedVertexIds);
+        for (const edge of meshData.edges.values()) {
+            if (vSet.has(edge.v1Id) && vSet.has(edge.v2Id)) {
+                derivedEdgeIds.push(edge.id);
+            }
+        }
+    }
+
+    // Combine explicit selected edges with derived ones
+    const effectiveEdgeIds = mode === 'edge' ? selectedEdgeIds : derivedEdgeIds;
+
     // Robustness: Ensure selectedVertexIds includes all vertices of selected faces
     if (mode === 'face') {
         const vSet = new Set(selectedVertexIds);
@@ -412,7 +426,7 @@ export class ExtrudeTool {
     this.boundaryEdges = vertexEditor.getBoundaryEdges(
         meshData, 
         selectedVertexIds, 
-        mode === 'edge' ? selectedEdgeIds : [], 
+        effectiveEdgeIds, 
         mode === 'face' ? selectedFaceIds : []
     );
 
@@ -492,7 +506,7 @@ export class ExtrudeTool {
 
     // Handle isolated vertices
     const connectedVertexIds = new Set();
-    for (let edgeId of selectedEdgeIds) {
+    for (let edgeId of effectiveEdgeIds) {
       const edge = meshData.edges.get(edgeId);
       if (!edge) continue;
       connectedVertexIds.add(edge.v1Id);
