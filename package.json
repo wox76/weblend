@@ -1,6 +1,6 @@
 {
   "name": "weblend",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "description": "Collaborative 3D Modeling Tool inspired by Blender",
   "main": "js/main.js",
   "repository": {

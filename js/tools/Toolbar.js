@@ -68,7 +68,7 @@ export default class Toolbar {
     });
 
     const onSelectionUpdate = () => {
-      if (this.isTransformDragging) return;
+      if (this.isTransformDragging || this.isModalTransforming()) return;
 
       const activeTool = this.getActiveTool();
       if (['move', 'rotate', 'scale', 'extrude'].includes(activeTool)) {
