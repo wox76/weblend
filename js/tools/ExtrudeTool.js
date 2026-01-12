@@ -187,6 +187,12 @@ export class ExtrudeTool {
     this.transformControls.detach(); // Detach gizmo
     this.controls.enabled = false; // Disable orbit controls
 
+    // Hide other gizmos manually instead of disabling tools to avoid state issues
+    if (this.editor.toolbar) {
+        const tools = [this.editor.toolbar.moveTool, this.editor.toolbar.rotateTool, this.editor.toolbar.scaleTool];
+        tools.forEach(t => { if(t && t.transformControls) t.transformControls.visible = false; });
+    }
+
     this.startExtrudeInternal();
 
     window.addEventListener('mousemove', this.onModalMouseMoveHandler);
