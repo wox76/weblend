@@ -188,6 +188,15 @@ export class SeparateSelectionCommand {
           if (f) afterMeshData.deleteFace(f);
       }
 
+      // Cleanup isolated edges (edges with no faces)
+      const isolatedEdges = [];
+      for (const [eid, e] of afterMeshData.edges) {
+          if (!e.faceIds || e.faceIds.size === 0) {
+              isolatedEdges.push(e);
+          }
+      }
+      for (const e of isolatedEdges) afterMeshData.deleteEdge(e);
+
       // Cleanup isolated vertices
       const isolatedVertices = [];
       for (const [vid, v] of afterMeshData.vertices) {
@@ -204,7 +213,10 @@ export class SeparateSelectionCommand {
       // 2. Create Commands to Add New Objects
       for (const newMD of newMeshesData) {
           const newObj = this.object.clone(); // Clone material, transform, etc.
-          newObj.geometry = new THREE.BufferGeometry(); // Placeholder
+          
+          // Generate actual geometry from MeshData
+          newObj.geometry = newMD.toDuplicatedVertexGeometry(); 
+          
           newObj.userData.meshData = newMD;
           newObj.name = this.editor.sceneManager.getUniqueName(this.object.name + '.sep');
           
