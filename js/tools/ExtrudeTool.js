@@ -24,32 +24,23 @@ export class ExtrudeTool {
     this.extrusionCentroid = new THREE.Vector3();
     this.onModalMouseMoveHandler = this.onModalMouseMove.bind(this);
     this.onModalMouseUpHandler = this.onModalMouseUp.bind(this);
+    
+    // Viewport drag handlers
+    this.onViewportMouseDown = this.onViewportMouseDown.bind(this);
+    this.onViewportMouseMove = this.onViewportMouseMove.bind(this);
+    this.onViewportMouseUp = this.onViewportMouseUp.bind(this);
 
-    this.transformControls = new TransformControls(this.camera, this.renderer.domElement);
+    // Initialize without domElement to prevent internal event listeners
+    this.transformControls = new TransformControls(this.camera, undefined);
     this.transformControls.size = 0.4;
     this.transformControls.setMode('translate');
     this.transformControls.visible = false;
+    this.transformControls.enabled = false; // Disable interaction raycasting
 
-    this.transformControls.addEventListener('dragging-changed', (event) => {
-      this.controls.enabled = !event.value;
-      if (!event.value) this.signals.objectChanged.dispatch();
-    });
-
-    this.transformControls.addEventListener('mouseDown', () => {
-      this.signals.transformDragStarted.dispatch();
-    });
-
-    this.transformControls.addEventListener('mouseUp', () => {
-      requestAnimationFrame(() => {
-        this.signals.transformDragEnded.dispatch();
-      });
-    });
-
+    // We don't listen to transformControls events anymore because we handle input manually
     this.sceneEditorHelpers.add(this.transformControls.getHelper());
 
     this.changeTransformControlsColor();
-
-    this.setupTransformListeners();
   }
 
   changeTransformControlsColor() {
@@ -72,51 +63,7 @@ export class ExtrudeTool {
   }
 
   setupTransformListeners() {
-    this.transformControls.addEventListener('mouseDown', () => {
-      console.log('ExtrudeTool: mouseDown');
-      const handle = this.transformControls.object;
-      if (!handle) return;
-      this.objectPositionOnDown = handle.getWorldPosition(this._worldPosHelper).clone();
-      this.extrudeStarted = false;
-    });
-
-    this.transformControls.addEventListener('change', () => {
-      const handle = this.transformControls.object;
-      if (!handle || !this.objectPositionOnDown) return;
-
-      if (!this.extrudeStarted) {
-        console.log('ExtrudeTool: Starting extrude');
-        this.startExtrude();
-        this.extrudeStarted = true;
-      }
-
-      this.updateExtrude();
-    });
-
-    this.transformControls.addEventListener('mouseUp', () => {
-      console.log('ExtrudeTool: mouseUp');
-      this.objectPositionOnDown = null;
-      this.extrudeStarted = false;
-
-      const mode = this.editSelection.subSelectionMode;
-      const editedObject = this.editSelection.editedObject;
-      const vertexEditor = new VertexEditor(this.editor, editedObject);
-      vertexEditor.updateGeometryAndHelpers();
-      const meshData = editedObject.userData.meshData;
-      this.afterMeshData = MeshData.serializeMeshData(meshData);
-
-      console.log('ExtrudeTool: Executing command', { newVertexIds: this.newVertexIds });
-      this.editor.execute(new ExtrudeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
-
-      // Keep selection on the new vertices
-      if (mode === 'vertex') {
-        this.editSelection.selectVertices(this.newVertexIds);
-      } else if (mode === 'edge') {
-        this.editSelection.selectEdges(this.newEdgeIds);
-      } else if (mode === 'face') {
-        this.editSelection.selectFaces(this.newFaceIds);
-      }
-    });
+    // Deprecated: transformControls is now passive (visual only)
   }
 
   enableFor(object) {
@@ -124,11 +71,109 @@ export class ExtrudeTool {
     if (!object) return;
     this.transformControls.attach(object);
     this.transformControls.visible = true;
+    
+    // Attach viewport listeners
+    const dom = this.renderer.domElement;
+    dom.addEventListener('mousedown', this.onViewportMouseDown);
+    dom.addEventListener('mousemove', this.onViewportMouseMove);
+    dom.addEventListener('mouseup', this.onViewportMouseUp);
   }
 
   disable() {
     this.transformControls.detach();
     this.transformControls.visible = false;
+    
+    // Remove viewport listeners
+    const dom = this.renderer.domElement;
+    dom.removeEventListener('mousedown', this.onViewportMouseDown);
+    dom.removeEventListener('mousemove', this.onViewportMouseMove);
+    dom.removeEventListener('mouseup', this.onViewportMouseUp);
+  }
+  
+  onViewportMouseDown(event) {
+      if (event.button !== 0) return; // Only left click
+      
+      this.isDragging = false;
+      this.mouseDownPos = new THREE.Vector2(event.clientX, event.clientY);
+  }
+  
+  onViewportMouseMove(event) {
+      if (!this.mouseDownPos) return;
+      
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+      const dx = mouseX - this.mouseDownPos.x;
+      const dy = mouseY - this.mouseDownPos.y;
+      
+      // Start drag threshold
+      if (!this.isDragging && (dx*dx + dy*dy > 4)) { // 2px threshold squared
+          this.isDragging = true;
+          this.signals.transformDragStarted.dispatch();
+          
+          // Cancel any potential box selection
+          if (this.editor.selectionBox) {
+              this.editor.selectionBox.finishSelection();
+          }
+
+          // Initialize extrusion
+          this.initialMousePosition.set(this.mouseDownPos.x, this.mouseDownPos.y);
+          this.startExtrudeInternal();
+          this.extrudeStarted = true;
+      }
+      
+      if (this.isDragging) {
+          // Reuse projection logic from Modal Mouse Move
+          this.handleExtrudeMove(mouseX, mouseY, this.mouseDownPos.x, this.mouseDownPos.y);
+      }
+  }
+  
+  onViewportMouseUp(event) {
+      if (event.button !== 0) return;
+      
+      if (this.isDragging) {
+          // Finish extrusion
+          this.confirmExtrude();
+          this.signals.transformDragEnded.dispatch();
+      }
+      
+      this.isDragging = false;
+      this.mouseDownPos = null;
+      this.extrudeStarted = false;
+  }
+  
+  handleExtrudeMove(mouseX, mouseY, startX, startY) {
+    const mouseDelta = new THREE.Vector2(mouseX - startX, mouseY - startY);
+    const editedObject = this.editSelection.editedObject;
+
+    // Project normal to screen space
+    const centroidWorld = this.extrusionCentroid.clone().applyMatrix4(editedObject.matrixWorld);
+    
+    // Transform normal to world space (using normal matrix approx)
+    const normalMatrix = new THREE.Matrix3().getNormalMatrix(editedObject.matrixWorld);
+    const normalWorld = this.extrusionNormal.clone().applyMatrix3(normalMatrix).normalize();
+    
+    const normalEndWorld = centroidWorld.clone().add(normalWorld);
+    
+    const centroidScreen = centroidWorld.clone().project(this.camera);
+    const normalEndScreen = normalEndWorld.clone().project(this.camera);
+    
+    // Screen space vector (NDC -> roughly screen direction, Y inverted)
+    const screenNormal = new THREE.Vector2(normalEndScreen.x - centroidScreen.x, -(normalEndScreen.y - centroidScreen.y));
+    
+    let amount = 0;
+    if (screenNormal.lengthSq() < 0.0001) {
+        amount = -mouseDelta.y;
+    } else {
+        screenNormal.normalize();
+        amount = mouseDelta.dot(screenNormal);
+    }
+
+    const distance = this.camera.position.distanceTo(centroidWorld);
+    const scaleFactor = distance * 0.002; 
+    
+    this.currentExtrusionVector.copy(this.extrusionNormal).multiplyScalar(amount * scaleFactor);
+
+    this.updateExtrudeInternal(this.currentExtrusionVector);
   }
 
   startModalExtrude() {
