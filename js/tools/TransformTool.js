@@ -551,13 +551,16 @@ export class TransformTool {
           event.stopPropagation();
           this.cancelModal();
       } else if (event.key.toLowerCase() === 'x') {
-          this.modalAxis = this.modalAxis === 'z' ? null : 'z'; // User: Blender X -> Three Z
+          event.stopPropagation();
+          this.modalAxis = this.modalAxis === 'x' ? null : 'x'; // X -> X
           this.updateModalTransform();
       } else if (event.key.toLowerCase() === 'y') {
-          this.modalAxis = this.modalAxis === 'x' ? null : 'x'; // Blender Y -> Three X
+          event.stopPropagation();
+          this.modalAxis = this.modalAxis === 'z' ? null : 'z'; // Y -> Z (Depth)
           this.updateModalTransform();
       } else if (event.key.toLowerCase() === 'z') {
-          this.modalAxis = this.modalAxis === 'y' ? null : 'y'; // Blender Z (Up) -> Three Y (Up)
+          event.stopPropagation();
+          this.modalAxis = this.modalAxis === 'y' ? null : 'y'; // Z -> Y (Up)
           this.updateModalTransform();
       }
   }
