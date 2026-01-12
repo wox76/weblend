@@ -283,6 +283,7 @@ export class ExtrudeTool {
 
     this.signals.objectChanged.dispatch();
     this.signals.modalExtrudeEnded.dispatch();
+    this.editor.toolbar.updateTools();
   }
 
   cancelModalExtrude() {
@@ -303,6 +304,7 @@ export class ExtrudeTool {
     vertexEditor.updateGeometryAndHelpers();
     this.signals.objectChanged.dispatch();
     this.signals.modalExtrudeEnded.dispatch();
+    this.editor.toolbar.updateTools();
   }
 
   startExtrudeInternal() {
