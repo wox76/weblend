@@ -1,7 +1,12 @@
+import { modifierStack } from "../modifiers/ModifierStack.js";
+
 export class ShadingUtils {
   static applyShading(object, mode) {
-    const meshData = object.userData.meshData;
-    const geometry = this.createGeometryWithShading(meshData, mode);
+    const baseMeshData = object.userData.meshData;
+
+    // Apply Modifiers
+    const finalMeshData = modifierStack.applyModifiers(object, baseMeshData);
+    const geometry = this.createGeometryWithShading(finalMeshData, mode);
 
     object.geometry.dispose();
     object.geometry = geometry;
