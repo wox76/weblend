@@ -96,33 +96,11 @@ export class KnifeTool {
     }
     this.cutPoints.push(cutPointData);
 
-    const aCut = this.cutPoints[0];
-    const bCut = this.cutPoints[1];
+    const aCut = this.cutPoints[this.cutPoints.length - 2];
+    const bCut = this.cutPoints[this.cutPoints.length - 1];
 
     this.computeNewVertices(aCut, bCut, meshData);
-    // Don't apply cut when selecting on the existing polyline
-    if (this.matchesExistingPolyline(meshData)) {
-      this.updatePreview(aCut.position, bCut.position);
-      this.cancelCut();
-      return;
-    }
     this.updatePreview(aCut.position, bCut.position);
-    this.beforeMeshData = MeshData.serializeMeshData(meshData);
-    
-    this.applyCut();
-
-    this.afterMeshData = MeshData.serializeMeshData(meshData);
-    this.editor.execute(new KnifeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
-
-    const mode = this.editSelection.subSelectionMode;
-    if (mode === 'vertex') {
-      this.editSelection.selectVertices(this.newVertices.map(v => v.id));
-    } else if (mode === 'edge') {
-      this.editSelection.selectEdges(this.newEdges.map(e => e.id));
-    } else if (mode === 'face') {
-      this.editSelection.clearSelection();
-    }
-    this.cancelCut();
   }
 
   onPointerMove(event) {
@@ -137,46 +115,29 @@ export class KnifeTool {
 
     const nearestVertexId = this.editSelection.pickNearestVertexOnMouse(event, this.renderer, this.camera, 0.02);
 
-    // No aCut selected yet → preview hover vertex
-    if (this.cutPoints.length === 0) {
-      
-      let hoverACut;
-      if (nearestVertexId !== null) {
-        const v = meshData.getVertex(nearestVertexId);
-        hoverACut = {
-          position: new THREE.Vector3(v.position.x, v.position.y, v.position.z).applyMatrix4(objectMatrix),
-          snapVertexId: nearestVertexId
-        };
-      } else {
-        hoverACut = {
-          position: null,
-          snapVertexId: null
-        };
-      }
+    // Use the last point as start for preview
+    const lastPoint = this.cutPoints.length > 0 ? this.cutPoints[this.cutPoints.length - 1] : null;
 
-      this.updatePreview(hoverACut.position);
-      return;
-    }
-
-    // aCut already selected → preview aCut and bCut
-    const aCut = this.cutPoints[0];
-
-    let bCut;
+    let currentPointData;
     if (nearestVertexId !== null) {
       const v = meshData.getVertex(nearestVertexId);
-      bCut = {
+      currentPointData = {
         position: new THREE.Vector3(v.position.x, v.position.y, v.position.z).applyMatrix4(objectMatrix),
         snapVertexId: nearestVertexId
       };
     } else {
-      bCut = {
+      currentPointData = {
         position: intersect.point.clone(),
         snapVertexId: null
       };
     }
 
-    this.computeNewVertices(aCut, bCut, meshData);
-    this.updatePreview(aCut.position, bCut.position);
+    if (lastPoint) {
+      this.computeNewVertices(lastPoint, currentPointData, meshData);
+      this.updatePreview(lastPoint.position, currentPointData.position);
+    } else {
+      this.updatePreview(currentPointData.position);
+    }
   }
 
   onKeyDown(event) {
@@ -184,7 +145,58 @@ export class KnifeTool {
 
     if (event.key === 'Escape') {
       this.cancelCut();
+    } else if (event.key === 'Enter') {
+      this.confirmCut();
     }
+  }
+
+  confirmCut() {
+    if (this.cutPoints.length < 2) {
+        this.cancelCut();
+        return;
+    }
+
+    const editedObject = this.editSelection.editedObject;
+    const meshData = editedObject.userData.meshData;
+    this.beforeMeshData = MeshData.serializeMeshData(meshData);
+
+    const allNewVertexIds = [];
+    const allNewEdgeIds = [];
+
+    // Apply cuts segment by segment
+    for (let i = 0; i < this.cutPoints.length - 1; i++) {
+        let a = this.cutPoints[i];
+        let b = this.cutPoints[i+1];
+
+        // Re-compute for current segment on current meshData
+        this.computeNewVertices(a, b, meshData);
+        
+        if (this.intersections.length > 0) {
+            this.applyCut();
+            
+            this.newVertices.forEach(v => allNewVertexIds.push(v.id));
+            this.newEdges.forEach(e => allNewEdgeIds.push(e.id));
+
+            // Logic to update 'b' snap if it corresponds to a newly created vertex?
+            // If b was an arbitrary point, it might now be a vertex.
+            // If b was a snapVertexId, it's stable.
+            // The simple sequential apply works because we re-run computeNewVertices on the modified meshData.
+        }
+    }
+
+    this.afterMeshData = MeshData.serializeMeshData(meshData);
+    this.editor.execute(new KnifeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
+
+    const mode = this.editSelection.subSelectionMode;
+    if (mode === 'vertex') {
+      this.editSelection.selectVertices(allNewVertexIds);
+    } else if (mode === 'edge') {
+      this.editSelection.selectEdges(allNewEdgeIds);
+    } else if (mode === 'face') {
+      this.editSelection.clearSelection();
+    }
+    
+    this.cancelCut();
   }
 
   getMouseIntersect(event) {
