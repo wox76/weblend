@@ -4,6 +4,7 @@ import { AddObjectCommand } from './AddObjectCommand.js';
 import { MeshDataCommand } from './MeshDataCommand.js';
 import { MultiCommand } from './MultiCommand.js';
 
+// SeparateSelectionCommand: Splits mesh data into new objects
 export class SeparateSelectionCommand {
   static type = 'SeparateSelectionCommand';
 

@@ -5,6 +5,7 @@ export class MultiCommand {
     this.editor = editor;
     this.name = name;
     this.commands = [];
+    // console.log('MultiCommand initialized:', name);
   }
 
   add(cmd) {
