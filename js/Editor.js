@@ -212,6 +212,26 @@ export default class Editor {
     });
 
     const camera = await loader.parseAsync(json.camera);
+    
+    // Auto-migrate camera from Y-up to Z-up if needed
+    if (camera.up.y > 0.9) {
+        // Old Y-up camera detected.
+        // Option 1: Just reset to new default (Safer)
+        // camera.copy(this.cameraManager.createDefaultCamera());
+        
+        // Option 2: Rotate to match new Z-up world (X->X, Y->Z, Z->-Y)
+        const oldPos = camera.position.clone();
+        camera.position.set(oldPos.x, -oldPos.z, oldPos.y);
+        
+        camera.up.set(0, 0, 1);
+        
+        // Rotate quaternion: Rotate +90 degrees around X axis
+        const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+        camera.quaternion.premultiply(q);
+        
+        camera.updateMatrixWorld();
+    }
+    
     this.cameraManager.setCamera(camera);
 
     this.viewportControls.fromJSON(json.viewportControls);
