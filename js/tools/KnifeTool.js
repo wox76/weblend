@@ -163,10 +163,15 @@ export class KnifeTool {
     const allNewVertexIds = [];
     const allNewEdgeIds = [];
 
+    const originalCutPoints = this.cutPoints;
+
     // Apply cuts segment by segment
-    for (let i = 0; i < this.cutPoints.length - 1; i++) {
-        let a = this.cutPoints[i];
-        let b = this.cutPoints[i+1];
+    for (let i = 0; i < originalCutPoints.length - 1; i++) {
+        let a = originalCutPoints[i];
+        let b = originalCutPoints[i+1];
+
+        // Temporarily restrict cutPoints to current segment for applyCut logic
+        this.cutPoints = [a, b];
 
         // Re-compute for current segment on current meshData
         this.computeNewVertices(a, b, meshData);
@@ -176,13 +181,10 @@ export class KnifeTool {
             
             this.newVertices.forEach(v => allNewVertexIds.push(v.id));
             this.newEdges.forEach(e => allNewEdgeIds.push(e.id));
-
-            // Logic to update 'b' snap if it corresponds to a newly created vertex?
-            // If b was an arbitrary point, it might now be a vertex.
-            // If b was a snapVertexId, it's stable.
-            // The simple sequential apply works because we re-run computeNewVertices on the modified meshData.
         }
     }
+
+    this.cutPoints = originalCutPoints; // Restore full list for cleanup
 
     this.afterMeshData = MeshData.serializeMeshData(meshData);
     this.editor.execute(new KnifeCommand(this.editor, editedObject, this.beforeMeshData, this.afterMeshData));
