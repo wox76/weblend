@@ -70,7 +70,7 @@ export class ExtrudeTool {
     console.log('ExtrudeTool: enableFor', object);
     if (!object) return;
     this.transformControls.attach(object);
-    this.transformControls.visible = true;
+    this.transformControls.visible = false;
     
     // Attach viewport listeners
     const dom = this.renderer.domElement;
