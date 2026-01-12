@@ -953,10 +953,7 @@ export class TransformTool {
         if (this.mode === 'translate') {
           if (!this.startPivotPosition) return;
           if (editedObject.userData.shading === 'auto') {
-            const hasModifiers = editedObject.userData.modifiers && editedObject.userData.modifiers.some(m => m.enabled);
-            if (!hasModifiers) {
-                ShadingUtils.applyShading(editedObject, 'auto');
-            }
+            ShadingUtils.applyShading(editedObject, 'auto');
           }
           
           const currentPivotPosition = handle.getWorldPosition(new THREE.Vector3());
