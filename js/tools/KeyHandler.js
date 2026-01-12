@@ -1,6 +1,7 @@
 import { SwitchSubModeCommand } from '../commands/SwitchSubModeCommand.js';
 import { AddObjectCommand } from '../commands/AddObjectCommand.js';
 import { JoinObjectsCommand } from '../commands/JoinObjectsCommand.js';
+import { MeshData } from '../core/MeshData.js';
 
 export class KeyHandler {
   constructor(editor) {
@@ -151,7 +152,27 @@ export class KeyHandler {
         const objects = this.selection.selectedObjects;
         if (objects && objects.length > 0) {
           objects.forEach(object => {
-            const clone = object.clone(true);
+            const clone = object.clone();
+            
+            // Deep clone MeshData to ensure independence
+            if (object.userData.meshData) {
+                const serialized = MeshData.serializeMeshData(object.userData.meshData);
+                clone.userData.meshData = MeshData.deserializeMeshData(serialized);
+            }
+            
+            // Ensure unique geometry and material references
+            if (clone.geometry) {
+                clone.geometry = clone.geometry.clone();
+            }
+            if (clone.material) {
+                // If array, clone array. If single, clone single.
+                if (Array.isArray(clone.material)) {
+                    clone.material = clone.material.map(m => m.clone());
+                } else {
+                    clone.material = clone.material.clone();
+                }
+            }
+
             this.editor.execute(new AddObjectCommand(this.editor, clone));
           });
         }
