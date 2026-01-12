@@ -304,11 +304,7 @@ export class TransformTool {
             const dLen = delta.length().toFixed(4);
             const dVec = `(${delta.x.toFixed(4)}, ${delta.y.toFixed(4)}, ${delta.z.toFixed(4)})`;
             
-            let displayLabel = this.modalAxis;
-            if (this.modalAxis === 'y') displayLabel = 'z'; // Vertical is Z in Blender
-            else if (this.modalAxis === 'z') displayLabel = 'y'; // Depth is Y in Blender
-            
-            let axisStr = displayLabel ? ` [${displayLabel.toUpperCase()}]` : '';
+            let axisStr = this.modalAxis ? ` [${this.modalAxis.toUpperCase()}]` : '';
             this.editor.viewportControls.setOperationStatus('TRANSLATE', `D: ${dLen} ${dVec}${axisStr}`);
 
             if (this.interactionMode === 'object') {
@@ -353,12 +349,7 @@ export class TransformTool {
         const deltaQuat = new THREE.Quaternion().setFromAxisAngle(axis.normalize(), angle);
 
         const deg = (angle * 180 / Math.PI).toFixed(2);
-        
-        let displayLabel = this.modalAxis;
-        if (this.modalAxis === 'y') displayLabel = 'z';
-        else if (this.modalAxis === 'z') displayLabel = 'y';
-        
-        let axisStr = displayLabel ? ` [${displayLabel.toUpperCase()}]` : '';
+        let axisStr = this.modalAxis ? ` [${this.modalAxis.toUpperCase()}]` : '';
         this.editor.viewportControls.setOperationStatus('ROTATE', `Angle: ${deg}°${axisStr}`);
 
         if (this.interactionMode === 'object') {
@@ -405,11 +396,7 @@ export class TransformTool {
             factor = this.numericInput;
         }
 
-        let displayLabel = this.modalAxis;
-        if (this.modalAxis === 'y') displayLabel = 'z';
-        else if (this.modalAxis === 'z') displayLabel = 'y';
-        
-        let axisStr = displayLabel ? ` [${displayLabel.toUpperCase()}]` : '';
+        let axisStr = this.modalAxis ? ` [${this.modalAxis.toUpperCase()}]` : '';
         this.editor.viewportControls.setOperationStatus('SCALE', `Factor: ${factor.toFixed(4)}${axisStr}`);
 
         // Direct Alignment Logic for Scale 0 + Axis
@@ -566,15 +553,15 @@ export class TransformTool {
           this.cancelModal();
       } else if (event.key.toLowerCase() === 'x') {
           event.stopPropagation();
-          this.modalAxis = this.modalAxis === 'x' ? null : 'x'; // X -> X
+          this.modalAxis = this.modalAxis === 'x' ? null : 'x'; // X -> X (Red)
           this.updateModalTransform();
       } else if (event.key.toLowerCase() === 'y') {
           event.stopPropagation();
-          this.modalAxis = this.modalAxis === 'z' ? null : 'z'; // Y -> Z (Depth)
+          this.modalAxis = this.modalAxis === 'y' ? null : 'y'; // Y -> Y (Vertical/Green)
           this.updateModalTransform();
       } else if (event.key.toLowerCase() === 'z') {
           event.stopPropagation();
-          this.modalAxis = this.modalAxis === 'y' ? null : 'y'; // Z -> Y (Up)
+          this.modalAxis = this.modalAxis === 'z' ? null : 'z'; // Z -> Z (Depth/Blue)
           this.updateModalTransform();
       }
   }
