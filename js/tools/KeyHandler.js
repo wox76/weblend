@@ -212,8 +212,8 @@ export class KeyHandler {
         this.signals.deleteSelectedFaces.dispatch();
       } else if (event.key.toLowerCase() === 'm') {
         this.editor.mergeMenu.show(this.mouse.x, this.mouse.y);
-      } else if (event.key === 'p') {
-        this.signals.separateSelection.dispatch();
+      } else if (event.key.toLowerCase() === 'p') {
+        this.editor.separateMenu.show(this.mouse.x, this.mouse.y);
       } else if (event.key === 'Tab') {
         event.preventDefault();
         if (document.activeElement && document.activeElement.blur) {

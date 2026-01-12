@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { MergeSelectionCommand } from '../commands/MergeSelectionCommand.js';
 import { MergeByDistanceCommand } from "../commands/MergeByDistanceCommand.js";
+import { SeparateSelectionCommand } from '../commands/SeparateSelectionCommand.js';
 
 export class MenubarMesh {
   constructor(editor, container) {
@@ -13,6 +14,27 @@ export class MenubarMesh {
   init() {
     const meshMenu = this.container.querySelector('#menu-mesh');
     // if (!meshMenu) return; // Might be null if container isn't full doc, but querySelector handles it.
+
+    // --- Separate Logic ---
+    const handleSeparate = (type) => {
+        const object = this.editor.editSelection.editedObject;
+        if (!object) {
+            alert('Enter Edit Mode to separate.');
+            return;
+        }
+        this.editor.execute(new SeparateSelectionCommand(this.editor, object, type));
+    };
+
+    const addSeparateListener = (selector, type) => {
+        const el = this.container.querySelector(selector);
+        if (el) {
+            el.addEventListener('click', () => handleSeparate(type));
+        }
+    };
+
+    addSeparateListener('.mesh-separate-selection', 'selection');
+    addSeparateListener('.mesh-separate-material', 'material');
+    addSeparateListener('.mesh-separate-loose', 'loose');
 
     // --- Merge Selection Logic ---
 

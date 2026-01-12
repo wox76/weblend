@@ -32,6 +32,7 @@ import { SettingsPanel } from './ui/SettingsPanel.js';
 import { NumberDragger } from './ui/NumberDragger.js';
 import { OperatorPanel } from './ui/OperatorPanel.js';
 import { MergeMenu } from './ui/MergeMenu.js';
+import { SeparateMenu } from './ui/SeparateMenu.js';
 
 export default class Editor {
   constructor() {
@@ -115,6 +116,7 @@ export default class Editor {
     this.numberDragger = new NumberDragger(this);
     this.operatorPanel = new OperatorPanel(this);
     this.mergeMenu = new MergeMenu(this);
+    this.separateMenu = new SeparateMenu(this);
 
     this.clock = new THREE.Clock();
 
