@@ -181,6 +181,35 @@ export class KnifeTool {
             
             this.newVertices.forEach(v => allNewVertexIds.push(v.id));
             this.newEdges.forEach(e => allNewEdgeIds.push(e.id));
+
+            // Update snapVertexId for next segment start point (b) if we landed on a vertex
+            // This ensures continuity for polyline cuts ending on edges/faces
+            const lastIntersection = this.intersections[this.intersections.length - 1];
+            if (lastIntersection && lastIntersection.distanceTo(b.position) < 1e-4) {
+                 // Find the vertex at this position
+                 // If it was an edge cut, it's the last new vertex created.
+                 // If it was a snap, it's the existing vertex.
+                 
+                 // Check edgeIntersections first
+                 const lastEdge = this.edgeIntersections[this.edgeIntersections.length - 1];
+                 let continuityVertexId = null;
+
+                 if (lastEdge) {
+                     // Created a new vertex
+                     const newV = this.newVertices[this.newVertices.length - 1];
+                     if (newV) continuityVertexId = newV.id;
+                 } else {
+                     // Snapped to existing
+                     const cutPointData = this.cutPoints.find(cp => cp.position.equals(lastIntersection));
+                     if (cutPointData) continuityVertexId = cutPointData.snapVertexId;
+                 }
+
+                 if (continuityVertexId !== null) {
+                     // b is the start of next segment (i+1 -> i+2)
+                     // In originalCutPoints, b is at index i+1
+                     originalCutPoints[i+1].snapVertexId = continuityVertexId;
+                 }
+            }
         }
     }
 
