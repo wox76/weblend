@@ -46,17 +46,22 @@ export class SidebarModifier {
   renderInitialUI() {
     this.container.innerHTML = '';
     this.modifiersContainer.innerHTML = '';
-    this.container.appendChild(this.modifiersContainer);
 
     const addBtnWrapper = document.createElement('li');
     addBtnWrapper.className = 'setting-option';
     addBtnWrapper.style.padding = '5px 10px';
+    addBtnWrapper.style.position = 'sticky';
+    addBtnWrapper.style.top = '0';
+    addBtnWrapper.style.backgroundColor = '#2b2b2b';
+    addBtnWrapper.style.zIndex = '10';
     this.addModifierButton = document.createElement('button');
     this.addModifierButton.className = 'action-button';
     this.addModifierButton.style.width = '100%';
     this.addModifierButton.textContent = '+ Add Modifier';
     addBtnWrapper.appendChild(this.addModifierButton);
     this.container.appendChild(addBtnWrapper);
+
+    this.container.appendChild(this.modifiersContainer);
 
     this.addModifierButton.addEventListener('click', (e) => this.toggleModifierDropdown(e));
 

@@ -31,6 +31,14 @@
   color: #b0b0b0;
 }
 
+.outliner-item:nth-child(even) {
+  background-color: #2b2b2b;
+}
+
+.outliner-item:nth-child(odd) {
+  background-color: #333333;
+}
+
 .outliner-item:hover {
   background-color: #3e3e3e;
 }
