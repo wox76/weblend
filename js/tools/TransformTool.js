@@ -303,7 +303,12 @@ export class TransformTool {
 
             const dLen = delta.length().toFixed(4);
             const dVec = `(${delta.x.toFixed(4)}, ${delta.y.toFixed(4)}, ${delta.z.toFixed(4)})`;
-            let axisStr = this.modalAxis ? ` [${this.modalAxis.toUpperCase()}]` : '';
+            
+            let displayLabel = this.modalAxis;
+            if (this.modalAxis === 'y') displayLabel = 'z'; // Vertical is Z in Blender
+            else if (this.modalAxis === 'z') displayLabel = 'y'; // Depth is Y in Blender
+            
+            let axisStr = displayLabel ? ` [${displayLabel.toUpperCase()}]` : '';
             this.editor.viewportControls.setOperationStatus('TRANSLATE', `D: ${dLen} ${dVec}${axisStr}`);
 
             if (this.interactionMode === 'object') {
@@ -348,7 +353,12 @@ export class TransformTool {
         const deltaQuat = new THREE.Quaternion().setFromAxisAngle(axis.normalize(), angle);
 
         const deg = (angle * 180 / Math.PI).toFixed(2);
-        let axisStr = this.modalAxis ? ` [${this.modalAxis.toUpperCase()}]` : '';
+        
+        let displayLabel = this.modalAxis;
+        if (this.modalAxis === 'y') displayLabel = 'z';
+        else if (this.modalAxis === 'z') displayLabel = 'y';
+        
+        let axisStr = displayLabel ? ` [${displayLabel.toUpperCase()}]` : '';
         this.editor.viewportControls.setOperationStatus('ROTATE', `Angle: ${deg}°${axisStr}`);
 
         if (this.interactionMode === 'object') {
@@ -395,7 +405,11 @@ export class TransformTool {
             factor = this.numericInput;
         }
 
-        let axisStr = this.modalAxis ? ` [${this.modalAxis.toUpperCase()}]` : '';
+        let displayLabel = this.modalAxis;
+        if (this.modalAxis === 'y') displayLabel = 'z';
+        else if (this.modalAxis === 'z') displayLabel = 'y';
+        
+        let axisStr = displayLabel ? ` [${displayLabel.toUpperCase()}]` : '';
         this.editor.viewportControls.setOperationStatus('SCALE', `Factor: ${factor.toFixed(4)}${axisStr}`);
 
         // Direct Alignment Logic for Scale 0 + Axis
@@ -694,17 +708,17 @@ export class TransformTool {
 
     helper.traverse(child => {
       if (child.name === 'X') {
-        // Assign Green to X
-        if (child.material) child.material.color.setHex(blenderGreen);
-        if (child.children) child.children.forEach(c => c.material?.color.setHex(blenderGreen));
+        // Assign Red to X (Horizontal)
+        if (child.material) child.material.color.setHex(blenderRed);
+        if (child.children) child.children.forEach(c => c.material?.color.setHex(blenderRed));
       } else if (child.name === 'Y') {
-        // Assign Blue to Y
+        // Assign Blue to Y (Vertical)
         if (child.material) child.material.color.setHex(blenderBlue); 
         if (child.children) child.children.forEach(c => c.material?.color.setHex(blenderBlue));
       } else if (child.name === 'Z') {
-        // Assign Red to Z
-        if (child.material) child.material.color.setHex(blenderRed); 
-        if (child.children) child.children.forEach(c => c.material?.color.setHex(blenderRed));
+        // Assign Green to Z (Depth)
+        if (child.material) child.material.color.setHex(blenderGreen); 
+        if (child.children) child.children.forEach(c => c.material?.color.setHex(blenderGreen));
       } else if (child.name === 'XY' || child.name === 'YZ' || child.name === 'XZ') {
          if (child.material) {
              child.material.color.setHex(gray);
