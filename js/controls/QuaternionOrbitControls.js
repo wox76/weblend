@@ -211,8 +211,8 @@ export class QuaternionOrbitControls {
 
 		const eyeDirection = this.eye.clone().normalize();
 		const upDirection = this.camera.up.clone().normalize();
-    const worldYAxis = new Vector3(0, 1, 0);
-		const worldUp = worldYAxis.clone().multiplyScalar(upDirection.dot(worldYAxis)).normalize();
+    const worldZAxis = new Vector3(0, 0, 1);
+		const worldUp = worldZAxis.clone().multiplyScalar(upDirection.dot(worldZAxis)).normalize();
 
 		const rightDirection = new Vector3().crossVectors(upDirection, eyeDirection).normalize();
 

@@ -13,11 +13,12 @@ export default class CameraManager {
     aspect = window.innerWidth / window.innerHeight,
     near = 0.1,
     far = 1000,
-    initialPosition = new THREE.Vector3(5, 2, -3)
+    initialPosition = new THREE.Vector3(5, -5, 2)
   } = {}) {
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     camera.name = 'CAMERA';
     camera.isDefault = true;
+    camera.up.set(0, 0, 1);
     camera.position.copy(initialPosition);
     camera.lookAt(new THREE.Vector3());
     return camera;

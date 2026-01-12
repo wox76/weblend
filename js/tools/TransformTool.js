@@ -44,8 +44,6 @@ export class TransformTool {
 
     this.sceneEditorHelpers.add(this.transformControls.getHelper());
 
-    this.customizeGizmo();
-
     this.setupListeners();
     this.setupTransformListeners();
     
@@ -683,36 +681,6 @@ export class TransformTool {
       document.removeEventListener('keydown', this._onModalKeyDown);
       document.removeEventListener('keyup', this._onModalKeyUp);
       document.removeEventListener('contextmenu', this._onModalPointerDown);
-  }
-
-  customizeGizmo() {
-    const blenderRed = 0xff3352;
-    const blenderGreen = 0x8bdc00;
-    const blenderBlue = 0x2b8ef4;
-    const gray = 0x808080;
-
-    const helper = this.transformControls.getHelper();
-
-    helper.traverse(child => {
-      if (child.name === 'X') {
-        // Assign Red to X (Horizontal)
-        if (child.material) child.material.color.setHex(blenderRed);
-        if (child.children) child.children.forEach(c => c.material?.color.setHex(blenderRed));
-      } else if (child.name === 'Y') {
-        // Assign Blue to Y (Vertical)
-        if (child.material) child.material.color.setHex(blenderBlue); 
-        if (child.children) child.children.forEach(c => c.material?.color.setHex(blenderBlue));
-      } else if (child.name === 'Z') {
-        // Assign Green to Z (Depth)
-        if (child.material) child.material.color.setHex(blenderGreen); 
-        if (child.children) child.children.forEach(c => c.material?.color.setHex(blenderGreen));
-      } else if (child.name === 'XY' || child.name === 'YZ' || child.name === 'XZ') {
-         if (child.material) {
-             child.material.color.setHex(gray);
-             child.material.opacity = 0.3;
-         }
-      }
-    });
   }
 
   setupTransformListeners() {

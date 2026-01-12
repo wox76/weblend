@@ -82,9 +82,9 @@ class ViewHelper extends Object3D {
 
 		const geometry = new CylinderGeometry( 0.04, 0.04, 0.8, 5 ).rotateZ( - Math.PI / 2 ).translate( 0.4, 0, 0 );
 
-		const xAxis = new Mesh( geometry, getAxisMaterial( color2 ) );
-		const yAxis = new Mesh( geometry, getAxisMaterial( color3 ) );
-		const zAxis = new Mesh( geometry, getAxisMaterial( color1 ) );
+		const xAxis = new Mesh( geometry, getAxisMaterial( color1 ) );
+		const yAxis = new Mesh( geometry, getAxisMaterial( color2 ) );
+		const zAxis = new Mesh( geometry, getAxisMaterial( color3 ) );
 
 		yAxis.rotation.z = Math.PI / 2;
 		zAxis.rotation.y = - Math.PI / 2;
@@ -93,12 +93,12 @@ class ViewHelper extends Object3D {
 		this.add( zAxis );
 		this.add( yAxis );
 
-		const posXAxisHelper = new Sprite( getSpriteMaterial( color2, 'Y' ) );
-		const posYAxisHelper = new Sprite( getSpriteMaterial( color3, 'Z' ) );
-		const posZAxisHelper = new Sprite( getSpriteMaterial( color1, 'X' ) );
-		const negXAxisHelper = new Sprite( getSpriteMaterial( color2 ) );
-		const negYAxisHelper = new Sprite( getSpriteMaterial( color3 ) );
-		const negZAxisHelper = new Sprite( getSpriteMaterial( color1 ) );
+		const posXAxisHelper = new Sprite( getSpriteMaterial( color1, 'X' ) );
+		const posYAxisHelper = new Sprite( getSpriteMaterial( color2, 'Y' ) );
+		const posZAxisHelper = new Sprite( getSpriteMaterial( color3, 'Z' ) );
+		const negXAxisHelper = new Sprite( getSpriteMaterial( color1 ) );
+		const negYAxisHelper = new Sprite( getSpriteMaterial( color2 ) );
+		const negZAxisHelper = new Sprite( getSpriteMaterial( color3 ) );
 
 		posXAxisHelper.position.x = 1;
 		posYAxisHelper.position.y = 1;

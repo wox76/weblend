@@ -3,7 +3,7 @@ import * as THREE from "three";
 export class GridHelper extends THREE.Mesh {
   constructor() {
     const geometry = new THREE.PlaneGeometry(100, 100);
-    geometry.rotateX(-Math.PI / 2);
+    // geometry.rotateX(-Math.PI / 2); // Removed to keep on XY plane
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
@@ -22,7 +22,7 @@ export class GridHelper extends THREE.Mesh {
       void main() {
         vec3 scaledPosition = position * uDistance;
         vec4 worldPosition = modelMatrix * vec4(scaledPosition, 1.0);
-        worldPosition.xz += uCameraPos.xz;
+        worldPosition.xy += uCameraPos.xy;
         gl_Position = projectionMatrix * viewMatrix * worldPosition;
         vWorldPos = worldPosition.xyz;
       }`,
@@ -44,14 +44,14 @@ export class GridHelper extends THREE.Mesh {
 
       float getAxisLine(vec2 coord, float thickness) {
         float xLine = 1.0 - smoothstep(0.0, thickness, abs(coord.x) / fwidth(coord.x));
-        float zLine = 1.0 - smoothstep(0.0, thickness, abs(coord.y) / fwidth(coord.y));
-        return max(xLine, zLine);
+        float yLine = 1.0 - smoothstep(0.0, thickness, abs(coord.y) / fwidth(coord.y));
+        return max(xLine, yLine);
       }
 
       float computeGridFade(vec3 cameraPos, vec3 worldPos, vec3 cameraDir) {
         float distFade = 1.0 - min(distance(cameraPos, worldPos) / uDistance / 40.0, 1.0);
         distFade = pow(distFade, 3.0);
-        vec3 planeNormal = vec3(0.0, 1.0, 0.0);
+        vec3 planeNormal = vec3(0.0, 0.0, 1.0);
         float angleDot = abs(dot(normalize(cameraDir), planeNormal));
         float fadeStart = 0.0872;
         float t = clamp((angleDot - fadeStart) / (1.0 - fadeStart), 0.0, 1.0);
@@ -60,7 +60,7 @@ export class GridHelper extends THREE.Mesh {
       }
 
       void main() {
-        vec2 coord = vWorldPos.xz;
+        vec2 coord = vWorldPos.xy;
         float minorGrid = getGridLine(coord, uGridSize, uLineThickness);
         float majorGrid = getGridLine(coord, uMajorGridSize, uLineThickness);
         float axis = getAxisLine(coord, uLineThickness * 1.5);
@@ -72,9 +72,9 @@ export class GridHelper extends THREE.Mesh {
         color = mix(color, uLineColor, majorGrid);
 
         if (axis > 0.0) {
-          vec3 xAxisColor = vec3(142.0 / 255.0, 254.0 / 255.0, 97.0 / 255.0);
-          vec3 zAxisColor = vec3(252.0 / 255.0, 74.0 / 255.0, 103.0 / 255.0);
-          color = (abs(coord.x) < abs(coord.y)) ? zAxisColor : xAxisColor;
+          vec3 xAxisColor = vec3(255.0 / 255.0, 51.0 / 255.0, 82.0 / 255.0); // Red
+          vec3 yAxisColor = vec3(139.0 / 255.0, 220.0 / 255.0, 0.0 / 255.0); // Green
+          color = (abs(coord.x) < abs(coord.y)) ? yAxisColor : xAxisColor;
         }
 
         float alpha = max(max(minorGrid * 0.4, majorGrid * 0.7), axis * 0.9) * combinedFade;

@@ -33,8 +33,9 @@ export class MeshDataBuilders {
     for (let i = 0; i < segments; i++) {
       const theta = (i / segments) * Math.PI * 2;
       const x = Math.cos(theta) * radius;
-      const z = Math.sin(theta) * radius;
-      const v = meshData.addVertex({ x, y: 0, z });
+      const y = Math.sin(theta) * radius;
+      // Z-up: Circle on XY plane
+      const v = meshData.addVertex({ x, y, z: 0 });
       vertices.push(v);
     }
 
@@ -48,10 +49,11 @@ export class MeshDataBuilders {
 
   static createPlaneMeshData() {
     const meshData = new MeshData();
-    const v0 = meshData.addVertex({ x: -0.5, y: 0, z: -0.5 });
-    const v1 = meshData.addVertex({ x:  0.5, y: 0, z: -0.5 });
-    const v2 = meshData.addVertex({ x:  0.5, y: 0, z:  0.5 });
-    const v3 = meshData.addVertex({ x: -0.5, y: 0, z:  0.5 });
+    // Z-up: Plane on XY plane
+    const v0 = meshData.addVertex({ x: -0.5, y: -0.5, z: 0 });
+    const v1 = meshData.addVertex({ x:  0.5, y: -0.5, z: 0 });
+    const v2 = meshData.addVertex({ x:  0.5, y:  0.5, z: 0 });
+    const v3 = meshData.addVertex({ x: -0.5, y:  0.5, z: 0 });
 
     meshData.addFace([v3, v2, v1, v0]);
     return meshData;
@@ -65,8 +67,8 @@ export class MeshDataBuilders {
     const widthSegments = 16;
     const heightSegments = 12;
 
-    // --- Top pole ---
-    const topVertex = meshData.addVertex({ x: 0, y: radius, z: 0 });
+    // --- Top pole (Z+) ---
+    const topVertex = meshData.addVertex({ x: 0, y: 0, z: radius });
 
     // --- Middle latitude vertices ---
     for (let y = 1; y < heightSegments; y++) {
@@ -78,15 +80,15 @@ export class MeshDataBuilders {
         const theta = u * Math.PI * 2;
 
         const vx = radius * Math.sin(phi) * Math.cos(theta);
-        const vy = radius * Math.cos(phi);
-        const vz = radius * Math.sin(phi) * Math.sin(theta);
+        const vy = radius * Math.sin(phi) * Math.sin(theta);
+        const vz = radius * Math.cos(phi); // Z is Up
 
         vertices.push(meshData.addVertex({ x: vx, y: vy, z: vz }));
       }
     }
 
-    // --- Bottom pole ---
-    const bottomVertex = meshData.addVertex({ x: 0, y: -radius, z: 0 });
+    // --- Bottom pole (Z-) ---
+    const bottomVertex = meshData.addVertex({ x: 0, y: 0, z: -radius });
 
     // --- Top cap faces ---
     for (let x = 0; x < widthSegments; x++) {
@@ -135,15 +137,16 @@ export class MeshDataBuilders {
     for (let i = 0; i < radialSegments; i++) {
       const theta = (i / radialSegments) * Math.PI * 2;
       const x = radius * Math.cos(theta);
-      const z = radius * Math.sin(theta);
+      const y = radius * Math.sin(theta); // Y is circle coord
 
-      bottomRing.push(meshData.addVertex({ x, y: -halfHeight, z }));
-      topRing.push(meshData.addVertex({ x, y:  halfHeight, z }));
+      // Z-up: Height along Z
+      bottomRing.push(meshData.addVertex({ x, y, z: -halfHeight }));
+      topRing.push(meshData.addVertex({ x, y, z:  halfHeight }));
     }
 
     // Centers for caps
-    const bottomCenter = meshData.addVertex({ x: 0, y: -halfHeight, z: 0 });
-    const topCenter = meshData.addVertex({ x: 0, y: halfHeight, z: 0 });
+    const bottomCenter = meshData.addVertex({ x: 0, y: 0, z: -halfHeight });
+    const topCenter = meshData.addVertex({ x: 0, y: 0, z: halfHeight });
 
     // --- Create faces ---
     // Side quads (wrap around with %)
@@ -187,13 +190,15 @@ export class MeshDataBuilders {
     for (let i = 0; i < radialSegments; i++) {
       const theta = (i / radialSegments) * Math.PI * 2;
       const x = radius * Math.cos(theta);
-      const z = radius * Math.sin(theta);
-      bottomRing.push(meshData.addVertex({ x, y: -halfHeight, z }));
+      const y = radius * Math.sin(theta); // Y is circle coord
+      
+      // Z-up: Height along Z
+      bottomRing.push(meshData.addVertex({ x, y, z: -halfHeight }));
     }
 
     // --- Apex and base center vertices ---
-    const apex = meshData.addVertex({ x: 0, y: halfHeight, z: 0 });
-    const baseCenter = meshData.addVertex({ x: 0, y: -halfHeight, z: 0 });
+    const apex = meshData.addVertex({ x: 0, y: 0, z: halfHeight });
+    const baseCenter = meshData.addVertex({ x: 0, y: 0, z: -halfHeight });
 
     // --- Side faces (triangle fan from apex) ---
     for (let i = 0; i < radialSegments; i++) {
@@ -233,11 +238,12 @@ export class MeshDataBuilders {
         const cosU = Math.cos(u);
         const sinU = Math.sin(u);
 
+        // Ring in XY plane (Z-up)
         const x = (radius + tubeRadius * cosU) * cosV;
-        const y = tubeRadius * sinU;
-        const z = (radius + tubeRadius * cosU) * sinV;
+        const y = (radius + tubeRadius * cosU) * sinV;
+        const z = tubeRadius * sinU;
 
-        vertices[j][i] = meshData.addVertex({ z, y, x });
+        vertices[j][i] = meshData.addVertex({ x, y, z });
       }
     }
 
