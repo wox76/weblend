@@ -39,6 +39,7 @@ You will find familiar concepts everywhere:
 There is still a lot to do to catch up with the giant that is **Blender**, but development is proceeding **extremely fast**. Thanks to the synergy between my coding skills and **Gemini**, features are being added and refined rapidly.
 
 ### ✨ Latest Updates
+- **Mesh Separate (P):** Split your geometry with the new Separate command. Support for separating by **Selection**, **By Material**, and **By Loose Parts**, allowing for complex mesh dismantling just like in Blender.
 - **Blender Z-up Coordinate System:** Adopted the industry-standard **Z-up** coordinate system (Z = Up, Blue axis), ensuring a seamless transition for Blender users.
 - **Incremental Object Naming:** Implemented an automatic naming system that adds `.001`, `.002`, etc., to duplicate object names, keeping your Scene Collection organized.
 - **Weblend Project Format:** Native support for saving and loading complete scenes using the **.weblend** file format, preserving modifiers, materials, and hierarchy.
