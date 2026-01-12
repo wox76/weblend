@@ -21,6 +21,11 @@ export class SetValueCommand {
 
   execute() {
     this.object = this.editor.objectByUuid(this.objectUuid);
+    
+    if (this.attributeName === 'name') {
+        this.newValue = this.editor.sceneManager.getUniqueName(this.newValue, this.object);
+    }
+
     this.object[this.attributeName] = this.newValue;
     this.editor.signals.objectChanged.dispatch();
   }

@@ -111,6 +111,11 @@ export default class SceneManager {
         return;
     }
 
+    // Ensure unique name
+    if (object.name) {
+        object.name = this.getUniqueName(object.name, object);
+    }
+
     if (object.userData.meshData && !(object.userData.meshData instanceof MeshData)) {
       MeshData.rehydrateMeshData(object);
     }
@@ -277,5 +282,38 @@ export default class SceneManager {
     for (const obj of objectsToRemove) {
       obj.parent?.remove(obj);
     }
+  }
+
+  getUniqueName(name, object = null) {
+      // Split into base name and number
+      const match = name.match(/^(.*)\.(\d{3})$/);
+      let baseName = name;
+      let counter = 1;
+
+      if (match) {
+          baseName = match[1];
+          counter = parseInt(match[2], 10) + 1; // Start checking from next number
+      }
+
+      // Check scene for existing names
+      const isTaken = (n) => {
+          let taken = false;
+          this.mainScene.traverse(obj => {
+              if (obj === object) return; // Don't check against self (for rename)
+              if (obj.name === n) taken = true;
+          });
+          return taken;
+      };
+
+      if (!isTaken(name)) return name;
+
+      // Increment until free
+      while (true) {
+          const newName = `${baseName}.${counter.toString().padStart(3, '0')}`;
+          if (!isTaken(newName)) {
+              return newName;
+          }
+          counter++;
+      }
   }
 }
