@@ -190,7 +190,7 @@ export class KeyHandler {
     } else if (this.currentMode === 'edit') {
       if (this.extruding) return;
       
-      if (event.key === 'w') {
+      if (event.key.toLowerCase() === 'w') {
         this.editor.toolbar.setActiveTool('select');
       } else if (event.key.toLowerCase() === 'a') {
           const now = Date.now();
@@ -206,7 +206,7 @@ export class KeyHandler {
           }
       } else if (event.key.toLowerCase() === 'i' && event.ctrlKey) {
           this.editor.editSelection.invert();
-      } else if (event.key === 'f') {
+      } else if (event.key.toLowerCase() === 'f') {
         this.signals.createFaceFromVertices.dispatch();
       } else if (event.key === 'Delete' || event.key.toLowerCase() === 'x') {
         this.signals.deleteSelectedFaces.dispatch();
@@ -220,7 +220,7 @@ export class KeyHandler {
           document.activeElement.blur();
         }
         this.signals.switchMode.dispatch('object');
-      } else if (event.key === 'e') {
+      } else if (event.key.toLowerCase() === 'e') {
         if (this.editor.editSelection.selectedVertexIds.size > 0 || this.editor.editSelection.selectedEdgeIds.size > 0 || this.editor.editSelection.selectedFaceIds.size > 0) {
           this.editor.startModalExtrude();
           this.extruding = true;
@@ -232,7 +232,7 @@ export class KeyHandler {
         event.preventDefault();
         this.editor.toolbar.setActiveTool('bevel');
         this.editor.startModalBevel();
-      } else if (event.key === 'k') {
+      } else if (event.key.toLowerCase() === 'k') {
         this.editor.toolbar.setActiveTool('knife');
       } else if (event.key === '1') {
         const current = this.editor.editSelection.subSelectionMode;
