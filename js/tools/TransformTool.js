@@ -723,6 +723,11 @@ export class TransformTool {
           const currentPivotPosition = handle.getWorldPosition(new THREE.Vector3());
           const offset = new THREE.Vector3().subVectors(currentPivotPosition, this.startPivotPosition);
 
+          // Update Status
+          const dLen = offset.length().toFixed(4);
+          const dVec = `(${offset.x.toFixed(4)}, ${offset.y.toFixed(4)}, ${offset.z.toFixed(4)})`;
+          this.editor.viewportControls.setOperationStatus('TRANSLATE', `D: ${dLen} ${dVec}`);
+
           for (let i = 0; i < objects.length; i++) {
             objects[i].position.copy(this.startPositions[i]).add(offset);
             objects[i].updateMatrixWorld(true);
@@ -732,6 +737,11 @@ export class TransformTool {
 
           const currentPivotQuaternion = handle.getWorldQuaternion(new THREE.Quaternion());
           const deltaQuat = new THREE.Quaternion().copy(currentPivotQuaternion).multiply(this.startPivotQuaternion.clone().invert());
+
+          // Update Status (Angle)
+          const angle = 2 * Math.acos(Math.min(1, Math.max(-1, deltaQuat.w)));
+          const deg = (angle * 180 / Math.PI).toFixed(2);
+          this.editor.viewportControls.setOperationStatus('ROTATE', `Angle: ${deg}°`);
 
           if (objects.length === 1) {
             // Single Object
@@ -758,6 +768,10 @@ export class TransformTool {
             currentPivotScale.y / this.startPivotScale.y,
             currentPivotScale.z / this.startPivotScale.z
           );
+
+          // Update Status
+          const sVec = `(${scaleFactor.x.toFixed(4)}, ${scaleFactor.y.toFixed(4)}, ${scaleFactor.z.toFixed(4)})`;
+          this.editor.viewportControls.setOperationStatus('SCALE', `Factor: ${sVec}`);
 
           if (objects.length === 1) {
             this.applyWorldScaleToObject(objects[0], scaleFactor, this.startScales[0]);
@@ -792,6 +806,11 @@ export class TransformTool {
           const currentPivotPosition = handle.getWorldPosition(new THREE.Vector3());
           const offset = new THREE.Vector3().subVectors(currentPivotPosition, this.startPivotPosition);
 
+          // Update Status
+          const dLen = offset.length().toFixed(4);
+          const dVec = `(${offset.x.toFixed(4)}, ${offset.y.toFixed(4)}, ${offset.z.toFixed(4)})`;
+          this.editor.viewportControls.setOperationStatus('TRANSLATE', `D: ${dLen} ${dVec}`);
+
           const newPositions = this.oldPositions.map(pos => pos.clone().add(offset));
           this.vertexEditor.setVerticesWorldPositions(selectedVertexIds, newPositions);
         }
@@ -800,6 +819,11 @@ export class TransformTool {
           const pivot = this.startPivotPosition.clone();
           const currentPivotQuaternion = handle.getWorldQuaternion(new THREE.Quaternion());
           const deltaQuat = currentPivotQuaternion.clone().multiply(this.startPivotQuaternion.clone().invert());
+
+          // Update Status (Angle)
+          const angle = 2 * Math.acos(Math.min(1, Math.max(-1, deltaQuat.w)));
+          const deg = (angle * 180 / Math.PI).toFixed(2);
+          this.editor.viewportControls.setOperationStatus('ROTATE', `Angle: ${deg}°`);
 
           const newPositions = this.oldPositions.map(pos => {
             const local = pos.clone().sub(pivot);
@@ -819,6 +843,10 @@ export class TransformTool {
             currentScale.z / this.startPivotScale.z
           );
 
+          // Update Status
+          const sVec = `(${scaleFactor.x.toFixed(4)}, ${scaleFactor.y.toFixed(4)}, ${scaleFactor.z.toFixed(4)})`;
+          this.editor.viewportControls.setOperationStatus('SCALE', `Factor: ${sVec}`);
+
           const newPositions = this.oldPositions.map(pos => {
             const local = pos.clone().sub(pivot);
             local.multiply(scaleFactor);
@@ -837,6 +865,8 @@ export class TransformTool {
     this.transformControls.addEventListener('mouseUp', () => {
       const handle = this.transformControls.object;
       if (!handle) return;
+
+      this.editor.viewportControls.clearOperationStatus();
 
       if (this.interactionMode === 'object') {
         const objects = this.selection.selectedObjects;
