@@ -12,6 +12,8 @@ Combining my experience in **JavaScript, WebGL, HTML, and CSS** with the cutting
 
 The result is **Weblend**.
 
+🚀 **Try it now:** [https://wox76.github.io/weblend/](https://wox76.github.io/weblend/)
+
 ## 📺 Feature Demonstrations
 
 ### 🪞 Real-time Mirror Modifier
