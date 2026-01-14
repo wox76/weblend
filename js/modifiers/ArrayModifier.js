@@ -98,7 +98,7 @@ export class ArrayModifier {
         const newFaceVertices = f.vertexIds.map(vid => vertexMap.get(vid));
         // Check if all vertices exist (should be yes)
         if (newFaceVertices.every(v => v !== undefined)) {
-          meshData.addFace(newFaceVertices, f.uvs);
+          meshData.addFace(newFaceVertices, f.uvs, f.materialIndex);
         }
       }
     }

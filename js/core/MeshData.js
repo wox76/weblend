@@ -330,13 +330,27 @@ export class MeshData {
   static fromBufferGeometry(geometry) {
     const meshData = new MeshData();
     const pos = geometry.getAttribute('position');
+    const uv = geometry.getAttribute('uv');
     const index = geometry.getIndex();
+    const groups = geometry.groups;
     
     // Add all vertices
     const newVertices = [];
     for (let i = 0; i < pos.count; i++) {
         newVertices.push(meshData.addVertex({ x: pos.getX(i), y: pos.getY(i), z: pos.getZ(i) }));
     }
+
+    // Helper to get material index for a face index (i = start of face in index buffer)
+    const getMaterialIndex = (faceStartIndex) => {
+        if (!groups || groups.length === 0) return 0;
+        for (const group of groups) {
+            // Check if faceStartIndex falls within this group
+            if (faceStartIndex >= group.start && faceStartIndex < group.start + group.count) {
+                return group.materialIndex;
+            }
+        }
+        return 0;
+    };
 
     // Add faces
     if (index) {
@@ -346,12 +360,34 @@ export class MeshData {
             const c = index.getX(i+2);
             // Verify indices are valid
             if (newVertices[a] && newVertices[b] && newVertices[c]) {
-                meshData.addFace([newVertices[a], newVertices[b], newVertices[c]]);
+                const matIndex = getMaterialIndex(i);
+                
+                let faceUVs = [];
+                if (uv) {
+                    faceUVs = [
+                        new THREE.Vector2(uv.getX(a), uv.getY(a)),
+                        new THREE.Vector2(uv.getX(b), uv.getY(b)),
+                        new THREE.Vector2(uv.getX(c), uv.getY(c))
+                    ];
+                }
+
+                meshData.addFace([newVertices[a], newVertices[b], newVertices[c]], faceUVs, matIndex);
             }
         }
     } else {
         for (let i = 0; i < pos.count; i += 3) {
-            meshData.addFace([newVertices[i], newVertices[i+1], newVertices[i+2]]);
+            const matIndex = getMaterialIndex(i);
+            
+            let faceUVs = [];
+            if (uv) {
+                faceUVs = [
+                    new THREE.Vector2(uv.getX(i), uv.getY(i)),
+                    new THREE.Vector2(uv.getX(i+1), uv.getY(i+1)),
+                    new THREE.Vector2(uv.getX(i+2), uv.getY(i+2))
+                ];
+            }
+
+            meshData.addFace([newVertices[i], newVertices[i+1], newVertices[i+2]], faceUVs, matIndex);
         }
     }
     return meshData;
