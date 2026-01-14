@@ -124,6 +124,12 @@ export class MenubarMesh {
     addListener('.mesh-merge-collapse', 'collapse');
     addListener('.mesh-merge-first', 'first');
     addListener('.mesh-merge-last', 'last');
+
+    // --- Merge By Distance ---
+    const mergeByDistBtn = this.container.querySelector('#menu-mesh-cleanup-merge');
+    if (mergeByDistBtn) {
+        mergeByDistBtn.addEventListener('click', () => this.handleMergeByDistance());
+    }
   }
 
   handleMergeByDistance() {
