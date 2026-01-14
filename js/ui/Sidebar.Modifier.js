@@ -2,6 +2,7 @@ import { AddModifierCommand } from '../commands/AddModifierCommand.js';
 import { RemoveModifierCommand } from '../commands/RemoveModifierCommand.js';
 import { UpdateModifierCommand } from '../commands/UpdateModifierCommand.js';
 import { MoveModifierCommand } from '../commands/MoveModifierCommand.js';
+import { ApplyModifierCommand } from '../commands/ApplyModifierCommand.js';
 
 export class SidebarModifier {
   constructor(editor) {
@@ -156,6 +157,11 @@ export class SidebarModifier {
   removeModifier(modifierId) {
     if (!this.selectedObject) return;
     this.editor.execute(new RemoveModifierCommand(this.editor, this.selectedObject, modifierId));
+  }
+
+  applyModifier(modifierId) {
+    if (!this.selectedObject) return;
+    this.editor.execute(new ApplyModifierCommand(this.editor, this.selectedObject, modifierId));
   }
 
   moveModifier(oldIndex, newIndex) {
@@ -342,6 +348,20 @@ export class SidebarModifier {
     });
     nameInput.addEventListener('click', (e) => e.stopPropagation());
     header.appendChild(nameInput);
+
+    // Apply Button
+    const applyBtn = document.createElement('span');
+    applyBtn.className = 'header-icon-btn apply-btn';
+    applyBtn.title = 'Apply';
+    applyBtn.innerHTML = '&#10003;'; // Checkmark
+    applyBtn.style.color = '#88dd88';
+    applyBtn.style.fontSize = '14px';
+    applyBtn.style.marginRight = '5px';
+    applyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.applyModifier(modifier.id);
+    });
+    header.appendChild(applyBtn);
 
     // Icons (REMOVED as requested, only keeping container for structure if needed, or removing entirely)
     // User requested: "Elimina le icone a fianco al Nome del campo, mantieni solo la X e le lineette."
