@@ -37,7 +37,7 @@ export default class SceneManager {
         })
     };
 
-    this.fakeLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+    this.fakeLight = new THREE.HemisphereLight(0xffffff, 0x444444, 8);
     this.fakeLight.position.set(0, 20, 0);
     this.fakeLight.userData.isEditorOnly = true;
     this.fakeLight.name = 'FakeHemisphereLight';
