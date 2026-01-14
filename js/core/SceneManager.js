@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { GridHelper } from '../helpers/GridHelper.js';
 import { Storage } from './Storage.js';
 import { MeshData } from './MeshData.js';
+import { ShadingUtils } from '../utils/ShadingUtils.js';
+import { modifierStack } from '../modifiers/ModifierStack.js';
 
 export default class SceneManager {
   constructor(editor) {
@@ -169,6 +171,20 @@ export default class SceneManager {
   applyShading(object, mode) {
       if (!object.isMesh) return;
       if (object.userData.isReference) return; // SKIP REFERENCES
+
+      // 1. Regenerate Geometry (to ensure modifiers and groups are correct)
+      // Use object's own shading preference (smooth/flat/auto), defaulting to flat
+      const geometryMode = object.userData.shading || 'flat';
+      const baseMeshData = object.userData.meshData;
+      
+      if (baseMeshData) {
+          const finalMeshData = modifierStack.applyModifiers(object, baseMeshData);
+          const geometry = ShadingUtils.createGeometryWithShading(finalMeshData, geometryMode);
+          if (geometry) {
+              if (object.geometry) object.geometry.dispose();
+              object.geometry = geometry;
+          }
+      }
 
       if (mode === 'material') {
           // Restore
