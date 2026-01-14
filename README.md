@@ -2,6 +2,8 @@
 
 **Weblend** is a passion project born from a deep love for **Blender** and the power of modern web technologies.
 
+🚀 **Try it now:** [https://wox76.github.io/weblend/](https://wox76.github.io/weblend/)
+
 ## 👨‍💻 About the Author & The Vision
 
 Hi, I'm **Andrea Rotondo**. I have been a passionate **Blender** enthusiast since version **2.43**. Over the years, I've watched **Blender** evolve into the industry standard it is today, and that evolution has always inspired me.
@@ -39,6 +41,10 @@ You will find familiar concepts everywhere:
 There is still a lot to do to catch up with the giant that is **Blender**, but development is proceeding **extremely fast**. Thanks to the synergy between my coding skills and **Gemini**, features are being added and refined rapidly.
 
 ### ✨ Latest Updates
+- **Apply Modifiers:** You can now permanently apply modifiers to the mesh geometry using the new "Apply" button in the modifier panel.
+- **Material Shading Lighting:** Added a "Fake Hemisphere Light" in Material Shading mode to ensure models are visible and not black, simulating a basic studio lighting environment.
+- **Modifier Improvements:** Fixed issues where materials were lost when using Array or Decimate modifiers. Geometry is now correctly regenerated on scene load.
+- **Robust Tools:** The Loop Cut tool now works correctly on meshes with active modifiers (like Subdivision Surface). The Extrude tool hotkey ('E') is now case-insensitive.
 - **Mesh Separate (P):** Split your geometry with the new Separate command. Support for separating by **Selection**, **By Material**, and **By Loose Parts**, allowing for complex mesh dismantling just like in Blender.
 - **Blender Z-up Coordinate System:** Adopted the industry-standard **Z-up** coordinate system (Z = Up, Blue axis), ensuring a seamless transition for Blender users.
 - **Incremental Object Naming:** Implemented an automatic naming system that adds `.001`, `.002`, etc., to duplicate object names, keeping your Scene Collection organized.
@@ -67,13 +73,11 @@ Join the conversation and stay updated:
 - **Facebook Group:** [Blender 3D Italia & Weblend](https://www.facebook.com/groups/134106979989778)
 - **Discord Server:** [Join our Discord](https://discord.com/channels/691583809640202251/691583810327805974)
 
-## 📂 Project Structure
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/wox76/weblend.git
-   ```
-2. **Run it:**
-   Simply open `index.html` in your browser.
+## 📂 Quick Start
+1. **Try it online:** [https://wox76.github.io/weblend/](https://wox76.github.io/weblend/)
+2. **Local Setup:**
+   - Clone the repository: `git clone https://github.com/wox76/weblend.git`
+   - Open `index.html` in your browser.
 
 ## 📄 License
 
