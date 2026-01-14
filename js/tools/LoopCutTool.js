@@ -100,12 +100,19 @@ export class LoopCutTool {
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   }
 
+  getRaycastTarget() {
+      const facePolygons = this.editor.sceneManager.sceneHelpers.getObjectByName('__FacePolygons');
+      if (facePolygons) return facePolygons;
+      return this.editedObject;
+  }
+
   initiateSlide() {
     this.editedObject = this.editSelection.editedObject;
     if (!this.editedObject) return;
 
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObject(this.editedObject, false);
+    const target = this.getRaycastTarget();
+    const intersects = this.raycaster.intersectObject(target, false);
     if (intersects.length === 0) return;
 
     const meshData = this.editedObject.userData.meshData;
@@ -272,7 +279,8 @@ export class LoopCutTool {
     if (!this.editedObject) return;
 
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObject(this.editedObject, false);
+    const target = this.getRaycastTarget();
+    const intersects = this.raycaster.intersectObject(target, false);
     if (intersects.length === 0) {
       this.clearPreview();
       return;
@@ -428,20 +436,45 @@ export class LoopCutTool {
   }
 
   getStartEdgeFromIntersect(meshData, intersect) {
-    if (!intersect || !intersect.face) return null;
+    if (!intersect) return null;
 
-    const { a, b, c } = intersect.face;
-    const toVertexId = meshData.bufferIndexToVertexId.get.bind(meshData.bufferIndexToVertexId);
+    let face = null;
 
-    const v1 = toVertexId(a);
-    const v2 = toVertexId(b);
-    const v3 = toVertexId(c);
+    if (intersect.object.name === '__FacePolygons' && intersect.object.userData.faceRanges) {
+        const triIndex = intersect.faceIndex;
+        const faceRanges = intersect.object.userData.faceRanges;
+        // Binary search could be faster but linear is fine for now
+        const range = faceRanges.find(r => triIndex >= r.triStart && triIndex < r.triStart + r.triCount);
+        if (range) {
+            face = meshData.faces.get(range.faceId);
+        }
+    } else if (intersect.object === this.editedObject && intersect.face) {
+        const { a, b, c } = intersect.face;
+        // Check if bufferIndexToVertexId is valid
+        if (meshData.bufferIndexToVertexId && meshData.bufferIndexToVertexId.size > 0) {
+             const toVertexId = meshData.bufferIndexToVertexId.get.bind(meshData.bufferIndexToVertexId);
+             const v1 = toVertexId(a);
+             const v2 = toVertexId(b);
+             const v3 = toVertexId(c);
+             
+             if (v1 !== undefined && v2 !== undefined && v3 !== undefined) {
+                 const edges = [
+                  meshData.getEdge(v1, v2),
+                  meshData.getEdge(v2, v3),
+                  meshData.getEdge(v3, v1)
+                ].filter(Boolean);
+                return this.findNearestEdge(meshData, edges, intersect.point);
+             }
+        }
+    }
 
-    const edges = [
-      meshData.getEdge(v1, v2),
-      meshData.getEdge(v2, v3),
-      meshData.getEdge(v3, v1)
-    ].filter(Boolean);
+    if (!face) return null;
+
+    const edges = [];
+    for (const eId of face.edgeIds) {
+        const e = meshData.edges.get(eId);
+        if (e) edges.push(e);
+    }
 
     return this.findNearestEdge(meshData, edges, intersect.point);
   }
