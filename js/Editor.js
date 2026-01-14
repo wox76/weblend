@@ -271,8 +271,8 @@ export default class Editor {
         if (obj.children) {
             for (let i = obj.children.length - 1; i >= 0; i--) {
                 const child = obj.children[i];
-                if (typeof child.toJSON !== 'function') {
-                    console.warn('Editor: Removing invalid object:', child);
+                if (child.userData.isEditorOnly || typeof child.toJSON !== 'function') {
+                    // console.warn('Editor: Removing invalid object:', child);
                     obj.remove(child);
                 } else {
                     sanitizeObject(child);

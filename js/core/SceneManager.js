@@ -37,6 +37,11 @@ export default class SceneManager {
         })
     };
 
+    this.fakeLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+    this.fakeLight.position.set(0, 20, 0);
+    this.fakeLight.userData.isEditorOnly = true;
+    this.fakeLight.name = 'FakeHemisphereLight';
+
     this.setupListeners();
   }
   
@@ -85,6 +90,10 @@ export default class SceneManager {
     this.mainScene.name = scene.name;
 
     this.removeEditorOnlyObjects(scene);
+
+    if (this.currentShadingMode === 'material') {
+        this.mainScene.add(this.fakeLight);
+    }
 
     while (scene.children.length > 0) {
       this.addObject(scene.children[0]);
@@ -249,6 +258,13 @@ export default class SceneManager {
 
     this.signals.viewportShadingChanged.add((value) => {
       this.currentShadingMode = value;
+
+      if (value === 'material') {
+          if (!this.fakeLight.parent) this.mainScene.add(this.fakeLight);
+      } else {
+          if (this.fakeLight.parent) this.fakeLight.parent.remove(this.fakeLight);
+      }
+
       this.mainScene.overrideMaterial = null; // Ensure no global override
 
       this.mainScene.traverse((obj) => {
